@@ -1,16 +1,7 @@
-# explore_mate
+# Explore Mate - Your travel companion
 
-Explore Mate - Your travel companion
+An application that can immerse you in the world of travel.
 
-## Getting Started
+With the help of neural networks, you are offered different routes. Various restaurants, events, and other places are specially selected for you. 
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Make a plan for the day? Explore Mate helps you do just that.
