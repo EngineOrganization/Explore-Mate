@@ -26,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: EdgeInsets.only(top: height * 0.02, left: width * 0.05, right: width * 0.7),
             height: height * 0.05,
             decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.5),
+                color: Color(0xFFf0f0f0),
                 borderRadius: BorderRadius.circular(20)
             ),
             child: Column(
@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
             height: height * 0.3,
             decoration: BoxDecoration(
-              color: Colors.blue,
+              color: Color(0xFF5e6488),
               borderRadius: BorderRadius.circular(24)
             ),
             child: Column(
@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: width * 0.25,
                   margin: EdgeInsets.only(left: 10, right: 10),
                   decoration: BoxDecoration(
-                    color: Colors.grey,
+                    color: Color(0xFF131a50),
                     borderRadius: BorderRadius.circular(14)
                   ),
                 );
