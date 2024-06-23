@@ -35,7 +35,6 @@ class _HomeScreenState extends State<HomeScreen> {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: ListView(
-        physics: PageScrollPhysics(),
         children: [
           Container(
             padding: EdgeInsets.all(2),
