@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'dart:io';
 
 
 class CreateTravelScreen extends StatefulWidget {
@@ -17,6 +20,34 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   List people = ['Один', 'Семья', 'Друзья', 'Влюблённые'];
   List budget = ['Маленький', 'Средний', 'Большой'];
 
+  Map<String, dynamic> places = {};
+  String dropdownCountry = 'Russia';
+  String dropdownCity = '';
+
+  List<DropdownMenuItem<String>> dropdownMenuItemsCountry = [];
+
+  @override
+  void initState() {
+    super.initState();
+    connectToServer();
+  }
+
+  void connectToServer() {
+    Socket socket;
+    Socket.connect('192.168.1.6', 4048).then((Socket sock) {
+      socket = sock;
+      socket.listen((data) {
+        final String response = String.fromCharCodes(data);
+        Map<String, dynamic> resp = json.decode(response);
+        places = resp;
+      },
+          cancelOnError: false);
+    }).catchError((e) {
+      print("Unable to connect: $e");
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
@@ -30,6 +61,27 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.05),
+            child: Text('Страна', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+            child: DropdownButton(
+              value: dropdownCountry,
+              onChanged: (String? value) {
+                setState(() {
+                  dropdownCountry = value!;
+                });
+              },
+              items: places.keys.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
             child: Text('Оцените степень своей активности', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
