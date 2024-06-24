@@ -1,3 +1,4 @@
+import 'package:explore_mate/screens/create_travel.dart';
 import 'package:explore_mate/screens/map.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int count_times = 10;
   int count_travels = 3;
   bool time_is_open = false;
+  bool is_travel = false;
 
   late YandexMapController controller;
   GlobalKey mapKey = GlobalKey();
@@ -62,21 +64,26 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(
             height: height * 0.05,
           ),
-          Container(
-            margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
-            height: height * 0.3,
-            decoration: BoxDecoration(
-              color: Color(0xFF5e6488),
-              borderRadius: BorderRadius.circular(24)
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(left: width * 0.05, top: height * 0.05),
-                  child: Text('Ваш план на день', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
-                )
-              ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateTravelScreen()));
+            },
+            child: Container(
+              margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
+              height: height * 0.3,
+              decoration: BoxDecoration(
+                  color: Color(0xFF5e6488),
+                  borderRadius: BorderRadius.circular(24)
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(left: width * 0.05, top: height * 0.05),
+                    child: Text(is_travel ? 'Ваш план на день' : 'Создать путешествие', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
+                  )
+                ],
+              ),
             ),
           ),
           Container(
