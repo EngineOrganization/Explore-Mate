@@ -18,13 +18,14 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   int people_type = 0;
   int budget_type = 0;
   List people = ['Один', 'Семья', 'Друзья', 'Влюблённые'];
+  List priorities = ['Еда', 'Необычные места', 'Экстрим'];
   List budget = ['Маленький', 'Средний', 'Большой'];
 
-  Map<String, dynamic> places = {};
+  Map<String, dynamic> places = {'Russia': ['Moscow']};
+  List<String> cities = [];
+  Set<String> priority = {};
   String dropdownCountry = 'Russia';
-  String dropdownCity = '';
-
-  List<DropdownMenuItem<String>> dropdownMenuItemsCountry = [];
+  String dropdownCity = 'Moscow';
 
   @override
   void initState() {
@@ -38,10 +39,16 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       socket = sock;
       socket.listen((data) {
         final String response = String.fromCharCodes(data);
+        print(response);
         Map<String, dynamic> resp = json.decode(response);
-        places = resp;
+        setState(() {
+          places = resp;
+        });
+        print(places.keys);
       },
           cancelOnError: false);
+      socket.write('Hello');
+      socket.close();
     }).catchError((e) {
       print("Unable to connect: $e");
     });
@@ -64,21 +71,39 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             child: Text('Страна', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
-            child: DropdownButton(
-              value: dropdownCountry,
-              onChanged: (String? value) {
-                setState(() {
-                  dropdownCountry = value!;
-                });
-              },
-              items: places.keys.map<DropdownMenuItem<String>>((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey, width: 2)
             ),
+            child: ButtonTheme(
+              alignedDropdown: true,
+              child: DropdownButton(
+                menuMaxHeight: height * 0.5,
+                alignment: Alignment.center,
+                borderRadius: BorderRadius.circular(20),
+                value: dropdownCountry,
+                onChanged: (String? value) {
+                  setState(() {
+                    dropdownCountry = value!;
+                    cities = List<String>.from(places[dropdownCountry]).toList();
+                    print(cities);
+                  });
+                },
+                icon: Icon(Icons.arrow_drop_down),
+                underline: SizedBox(),
+                items: places.keys.toList().map<DropdownMenuItem<String>>((String item) {
+                  return DropdownMenuItem<String>(
+                    value: item,
+                    child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                  );
+                }).toList(),
+              ),
+            )
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
+            child: Text('Город', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
@@ -113,7 +138,8 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                 return Container(
                   margin: EdgeInsets.only(right: width * 0.02),
                   child: ChoiceChip(
-                    label: Text(people[index]),
+                    checkmarkColor: Colors.white,
+                    label: Text(people[index], style: GoogleFonts.roboto(color: people_type == index ? Colors.white : Colors.black),),
                     selected: people_type == index,
                     onSelected: (value) {
                       setState(() {
@@ -143,11 +169,47 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   return Container(
                     margin: EdgeInsets.only(right: width * 0.02),
                     child: ChoiceChip(
-                      label: Text(budget[index]),
+                      checkmarkColor: Colors.white,
+                      label: Text(budget[index], style: GoogleFonts.roboto(color: budget_type == index ? Colors.white : Colors.black),),
                       selected: budget_type == index,
                       onSelected: (value) {
                         setState(() {
                           budget_type = index;
+                        });
+                      },
+                      selectedColor: Color(0xFF5e6488),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)
+                      ),
+                    ),
+                  );
+                },
+              )
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
+            child: Text('Ваши приоритеты', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+          ),
+          Container(
+              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02),
+              height: height * 0.05,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: priorities.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: EdgeInsets.only(right: width * 0.02),
+                    child: ChoiceChip(
+                      checkmarkColor: Colors.white,
+                      label: Text(priorities[index], style: GoogleFonts.roboto(color: priority.contains(priorities[index]) ? Colors.white : Colors.black),),
+                      selected: priority.contains(priorities[index]),
+                      onSelected: (value) {
+                        setState(() {
+                          if (priority.contains(priorities[index])) {
+                            priority.remove(priorities[index]);
+                          } else {
+                            priority.add(priorities[index]);
+                          }
                         });
                       },
                       selectedColor: Color(0xFF5e6488),
@@ -182,6 +244,16 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                 fillColor: Colors.grey.shade300,
                 filled: true,
               ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.3, right: width * 0.3, top: height * 0.02),
+            child: ElevatedButton(
+              onPressed: () {},
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black
+              ),
+              child: Text('Сгенерировать варианты!', style: GoogleFonts.roboto(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),),
             ),
           )
         ],
