@@ -43,6 +43,8 @@ dependencies:
   socket_io_client: ^2.0.3+1
   flutter_map: ^7.0.1
   latlong2: ^0.9.1
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -95,3 +97,18 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/explore_mate_logotype.png"
+
+
+flutter_native_splash:
+  android: true
+  ios: true
+  web: false
+  image: "assets/explore_mate.png"
+  branding: "assets/engine.png"
+  color: '#FFFFFF'
