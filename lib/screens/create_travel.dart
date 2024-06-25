@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
@@ -14,6 +13,8 @@ class CreateTravelScreen extends StatefulWidget {
 
 class _CreateTravelScreenState extends State<CreateTravelScreen> {
 
+  late Socket socket;
+
   double activity_value = 5;
   int people_type = 0;
   int budget_type = 0;
@@ -21,11 +22,11 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   List priorities = ['Еда', 'Необычные места', 'Экстрим'];
   List budget = ['Маленький', 'Средний', 'Большой'];
 
-  Map<String, dynamic> places = {'Russia': ['Moscow']};
-  List<String> cities = [];
+  List<String> countries = ['Не указано'];
+  List<String> cities = ['Не указано'];
   Set<String> priority = {};
-  String dropdownCountry = 'Russia';
-  String dropdownCity = 'Moscow';
+  String dropdownCountry = 'Не указано';
+  String dropdownCity = 'Не указано';
 
   @override
   void initState() {
@@ -33,25 +34,46 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
     connectToServer();
   }
 
-  void connectToServer() {
-    Socket socket;
+  void connectToServer() async {
     Socket.connect('192.168.1.6', 4048).then((Socket sock) {
       socket = sock;
+      Map<String, dynamic> data = new Map<String, dynamic>();
+      data['type'] = 1;
+      socket.write(json.encode(data));
       socket.listen((data) {
         final String response = String.fromCharCodes(data);
-        print(response);
-        Map<String, dynamic> resp = json.decode(response);
+        List<dynamic> resp = json.decode(response);
         setState(() {
-          places = resp;
+          countries = List<String>.from(resp as List);
         });
-        print(places.keys);
       },
           cancelOnError: false);
-      socket.write('Hello');
-      socket.close();
     }).catchError((e) {
       print("Unable to connect: $e");
     });
+    socket.close();
+  }
+
+
+  void get_cities() {
+    Socket.connect('192.168.1.6', 4048).then((Socket sock) {
+      socket = sock;
+      Map<String, dynamic> data = new Map<String, dynamic>();
+      data['type'] = 2;
+      data['data'] = dropdownCountry;
+      socket.write(json.encode(data));
+      socket.listen((data) {
+        final String response = String.fromCharCodes(data);
+        List<dynamic> resp = json.decode(response);
+        setState(() {
+          cities = List<String>.from(resp as List);
+        });
+      },
+          cancelOnError: false);
+    }).catchError((e) {
+      print("Unable to connect: $e");
+    });
+    socket.close();
   }
 
 
@@ -76,34 +98,67 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.grey, width: 2)
             ),
-            child: ButtonTheme(
-              alignedDropdown: true,
-              child: DropdownButton(
-                menuMaxHeight: height * 0.5,
-                alignment: Alignment.center,
-                borderRadius: BorderRadius.circular(20),
-                value: dropdownCountry,
-                onChanged: (String? value) {
-                  setState(() {
-                    dropdownCountry = value!;
-                    cities = List<String>.from(places[dropdownCountry]).toList();
-                    print(cities);
-                  });
-                },
-                icon: Icon(Icons.arrow_drop_down),
-                underline: SizedBox(),
-                items: places.keys.toList().map<DropdownMenuItem<String>>((String item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
-                  );
-                }).toList(),
+            child: Center(
+              child: ButtonTheme(
+                alignedDropdown: true,
+                child: DropdownButton(
+                  menuMaxHeight: height * 0.5,
+                  alignment: Alignment.center,
+                  borderRadius: BorderRadius.circular(20),
+                  value: dropdownCountry,
+                  onChanged: (String? value) {
+                    setState(() {
+                      dropdownCountry = value!;
+                      dropdownCity = 'Не указано';
+                      get_cities();
+                    });
+                  },
+                  icon: Icon(Icons.arrow_drop_down),
+                  underline: SizedBox(),
+                  items: countries.map<DropdownMenuItem<String>>((String item) {
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                    );
+                  }).toList(),
+                ),
               ),
             )
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
             child: Text('Город', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+          ),
+          Container(
+              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey, width: 2)
+              ),
+              child: Center(
+                child: ButtonTheme(
+                  alignedDropdown: true,
+                  child: DropdownButton(
+                    menuMaxHeight: height * 0.5,
+                    alignment: Alignment.center,
+                    borderRadius: BorderRadius.circular(20),
+                    value: dropdownCity,
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownCity = value!;
+                      });
+                    },
+                    icon: Icon(Icons.arrow_drop_down),
+                    underline: SizedBox(),
+                    items: cities.map<DropdownMenuItem<String>>((String item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              )
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
