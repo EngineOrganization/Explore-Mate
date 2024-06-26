@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:explore_mate/screens/create_travel.dart';
 import 'package:explore_mate/screens/map.dart';
 import 'package:explore_mate/screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_charts/sparkcharts.dart';
+import 'package:timeline_tile/timeline_tile.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -17,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
-  int count_times = 10;
   int count_travels = 3;
   bool time_is_open = false;
   bool is_travel = false;
@@ -162,43 +164,39 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text('Сверимся?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.1, right: width * 0.1),
-            height: time_is_open ? (count_times + 1) * 20 : 6 * 20,
+            height: height * 0.2,
+            margin: EdgeInsets.only(left: width * 0.06, right: width * 0.06, top: height * 0.02),
             child: ListView.builder(
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: time_is_open ? count_times : 5,
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
               itemBuilder: (context, index) {
                 return Container(
-                  margin: EdgeInsets.only(top: 2),
-                  height: 20,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Container(
-                        color: time_is_open ? Colors.grey : Colors.grey.withOpacity(1 / (index + 1)),
-                        height: 3,
-                        width: width * 0.65,
+                  width: width * 0.3,
+                  height: height * 0.2,
+                  child: TimelineTile(
+                    isFirst: index == 0,
+                    isLast: index == 4,
+                    axis: TimelineAxis.horizontal,
+                    beforeLineStyle: LineStyle(color: Colors.black),
+                    indicatorStyle: IndicatorStyle(
+                        width: 50,
+                        color: Colors.black
+                    ),
+                    endChild: Container(
+                      margin: EdgeInsets.only(right: width * 0.03, top: height * 0.01),
+                      width: width * 0.3,
+                      decoration: BoxDecoration(
+                        color: Color(0xFFedf0f8),
+                        borderRadius: BorderRadius.circular(20)
                       ),
-                      Text('XX:XX', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),)
-                    ],
+                      child: Container(
+                        margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
+                        child: Text('Text', style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
+                      ),
+                    ),
                   ),
                 );
               },
-            ),
-          ),
-          Container(
-            height: height * 0.025,
-            margin: EdgeInsets.only(left: width * 0.4, right: width * 0.4),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black
-              ),
-              onPressed: () {
-                setState(() {
-                  time_is_open = !time_is_open;
-                });
-              },
-              child: Icon(time_is_open ? Icons.arrow_upward_outlined : Icons.arrow_downward_outlined, color: Colors.white, size: 18,),
             ),
           ),
           Container(
@@ -242,15 +240,15 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Text('Туры, сгенерированные для вас', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
+            margin: EdgeInsets.only(left: width * 0.055, right: width * 0.055),
             height: height * 0.08,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: count_travels,
               itemBuilder: (context, index) {
                 return Container(
-                  width: width * 0.25,
-                  margin: EdgeInsets.only(left: 10, right: 10),
+                  width: width * 0.26,
+                  margin: EdgeInsets.only(right: width * 0.055),
                   decoration: BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.circular(14)
