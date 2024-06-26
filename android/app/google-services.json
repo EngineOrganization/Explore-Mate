@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "406355821293",
-    "project_id": "explore-mate-10638",
-    "storage_bucket": "explore-mate-10638.appspot.com"
+    "project_number": "194619597829",
+    "project_id": "engine-4a21e",
+    "storage_bucket": "engine-4a21e.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:406355821293:android:8abcaebd7670b9bf3782e4",
+        "mobilesdk_app_id": "1:194619597829:android:7703dfebc8bfe340f2286c",
         "android_client_info": {
           "package_name": "com.engine.explore_mate"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyChpN9BcYRZ65JCygQYegrmROxIkEH8FZ4"
+          "current_key": "AIzaSyD4r7Vuz7D-hQXWsLLL92ZNEssTP3ZXqv4"
         }
       ],
       "services": {

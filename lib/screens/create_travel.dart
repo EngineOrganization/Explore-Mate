@@ -195,7 +195,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
             child: Slider(
               value: activity_value,
-              activeColor: Color(0xFF5e6488),
+              activeColor: Colors.black,
               max: 10,
               divisions: 10,
               label: activity_value.round().toString(),
@@ -228,7 +228,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                         people_type = index;
                       });
                     },
-                    selectedColor: Color(0xFF5e6488),
+                    selectedColor: Colors.black,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20)
                     ),
@@ -259,7 +259,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                           budget_type = index;
                         });
                       },
-                      selectedColor: Color(0xFF5e6488),
+                      selectedColor: Colors.black,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)
                       ),
@@ -296,7 +296,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                           }
                         });
                       },
-                      selectedColor: Color(0xFF5e6488),
+                      selectedColor: Colors.black,
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20)
                       ),
@@ -313,7 +313,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
               margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
               child: Slider(
                 value: day_value,
-                activeColor: Color(0xFF5e6488),
+                activeColor: Colors.black,
                 max: 30,
                 min: 1,
                 divisions: 29,
@@ -333,7 +333,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             height: height * 0.2,
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02),
             child: TextField(
-              cursorColor: Color(0xFF5e6488),
+              cursorColor: Colors.black,
               enabled: true,
               maxLines: 10,
               decoration: InputDecoration(
