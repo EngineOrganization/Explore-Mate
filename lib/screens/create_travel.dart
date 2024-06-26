@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class CreateTravelScreen extends StatefulWidget {
@@ -12,6 +13,8 @@ class CreateTravelScreen extends StatefulWidget {
 
 
 class _CreateTravelScreenState extends State<CreateTravelScreen> {
+
+  late User user;
 
   late Socket socket;
 
@@ -34,6 +37,16 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   void initState() {
     super.initState();
     connectToServer();
+    getUser();
+  }
+
+
+  void getUser() async {
+    await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
+      setState(() {
+        user = _user!;
+      });
+    });
   }
 
   void connectToServer() async {
@@ -91,10 +104,12 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       data['priorities'] = priority.toString();
       data['countDay'] = day_value.toString();
       data['budget'] = budget[budget_type];
+      data['uid'] = user.uid.toString();
       socket.write(json.encode(data));
       socket.listen((data) {
         final String response = String.fromCharCodes(data);
         print(jsonDecode(jsonDecode(response))['Trip']);
+
       },
           cancelOnError: false);
     }).catchError((e) {

@@ -28,9 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
   GlobalKey mapKey = GlobalKey();
   Future<bool> get locationPermissionNotGranted async => !(await Permission.location.request().isGranted);
 
-  List functions = ['Ближайшие магазины', 'Перевести речь собеседника'];
-  List functions_icons = [Icons.shopping_basket_outlined, Icons.translate];
-
+  List functions = ['Ближайшие магазины', 'Перевести речь собеседника', 'Придумать равзлечение'];
+  List functions_icons = [Icons.shopping_basket_outlined, Icons.translate, Icons.attractions_outlined];
   final List<ChartData> chartData = [
     ChartData('чебуречная', 1),
     ChartData('абоба', 2),
