@@ -22,7 +22,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   late User user;
 
-  int count_travels = 3;
   bool time_is_open = false;
   bool is_travel = false;
 
@@ -38,6 +37,10 @@ class _HomeScreenState extends State<HomeScreen> {
     ChartData('баобаб', 5),
     ChartData('шаурма', 7),
   ];
+
+  List<List<List<Map<String, String>>>> tours = [];
+  List tours_countries = [];
+  List tours_cities = [];
 
   @override
   void initState() {
@@ -56,14 +59,22 @@ class _HomeScreenState extends State<HomeScreen> {
     int length = snapshot.children.length;
     for (int i = 0; i < length; i++) {
       int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
+      tours.add([]);
+      tours_countries.add(snapshot.child(i.toString()).child('country').value.toString());
+      tours_cities.add(snapshot.child(i.toString()).child('city').value.toString());
       for (int j = 0; j < daysLength; j++) {
         int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children.length;
+        tours[i].add([]);
         for (int k = 0; k < actionsLength; k++) {
-          print(snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('name').value);
+          tours[i][j].add({});
+          tours[i][j][k]['name'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('name').value.toString();
+          tours[i][j][k]['lat'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('lat').value.toString();
+          tours[i][j][k]['lon'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('lon').value.toString();
         }
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -264,21 +275,29 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.04, top: width * 0.02),
-            child: Text('Туры, сгенерированные для вас', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+            child: Text('Туры, сгенерированные для вас', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.055, right: width * 0.055),
+            margin: EdgeInsets.only(left: width * 0.055, right: width * 0.055, top: height * 0.01),
             height: height * 0.08,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: count_travels,
+              itemCount: tours.length,
               itemBuilder: (context, index) {
                 return Container(
                   width: width * 0.26,
                   margin: EdgeInsets.only(right: width * 0.055),
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: Color(0xFFf0f0f0),
                     borderRadius: BorderRadius.circular(14)
+                  ),
+                  padding: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.01),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
+                      Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),),
+                    ],
                   ),
                 );
               },

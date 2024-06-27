@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
@@ -366,10 +367,10 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.3, right: width * 0.3, top: height * 0.02),
+            margin: EdgeInsets.only(left: width * 0.3, right: width * 0.3, top: height * 0.02, bottom: height * 0.02),
             child: ElevatedButton(
               onPressed: () {
-                get_tours();
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => GeneratedToursScreen()));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.black
