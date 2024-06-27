@@ -1,15 +1,15 @@
-import 'dart:developer';
-
 import 'package:explore_mate/screens/create_travel.dart';
 import 'package:explore_mate/screens/map.dart';
 import 'package:explore_mate/screens/profile.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/sparkcharts.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+
 
 class HomeScreen extends StatefulWidget {
 
@@ -19,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 
 
 class _HomeScreenState extends State<HomeScreen> {
+
+  late User user;
 
   int count_travels = 3;
   bool time_is_open = false;
@@ -36,6 +38,32 @@ class _HomeScreenState extends State<HomeScreen> {
     ChartData('баобаб', 5),
     ChartData('шаурма', 7),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    get_generated_tours();
+  }
+
+  void get_generated_tours() async {
+    await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
+      setState(() {
+        user = _user!;
+      });
+    });
+    DatabaseReference ref = FirebaseDatabase.instance.ref().child('users/' + user.uid + '/generated_tours');
+    final snapshot = await ref.get();
+    int length = snapshot.children.length;
+    for (int i = 0; i < length; i++) {
+      int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
+      for (int j = 0; j < daysLength; j++) {
+        int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children.length;
+        for (int k = 0; k < actionsLength; k++) {
+          print(snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('name').value);
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

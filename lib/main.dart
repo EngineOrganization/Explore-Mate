@@ -16,6 +16,7 @@ void main() async {
         messagingSenderId: 'sendid',
         projectId: "engine-4a21e",
         storageBucket: "engine-4a21e.appspot.com",
+        databaseURL: "https://engine-4a21e-default-rtdb.europe-west1.firebasedatabase.app/",
       )
   );
   bool isSign = false;
