@@ -1,4 +1,5 @@
 import 'package:explore_mate/screens/create_travel.dart';
+import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:explore_mate/screens/map.dart';
 import 'package:explore_mate/screens/profile.dart';
 import 'package:flutter/material.dart';
@@ -43,21 +44,34 @@ class _HomeScreenState extends State<HomeScreen> {
   List tours_cities = [];
   int tours_count = 0;
 
+  String selected_tour_country = '';
+  String selected_tour_city = '';
+  String selected_tour_budget = '';
+
   @override
   void initState() {
     super.initState();
-    get_generated_tours();
+    get_tours();
   }
 
-  void get_generated_tours() async {
+  void get_tours() async {
     await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
       setState(() {
         user = _user!;
       });
     });
-    DatabaseReference ref = FirebaseDatabase.instance.ref().child('users/' + user.uid + '/generated_tours');
+    DatabaseReference ref = FirebaseDatabase.instance.ref().child('users/' + user.uid);
     ref.onValue.listen((DatabaseEvent event) {
-      final snapshot = event.snapshot;
+      final snapshot = event.snapshot.child('generated_tours');
+      final snapshot1 = event.snapshot.child('selected_tour');
+      if (event.snapshot.child('selected_tour').exists) {
+        setState(() {
+          is_travel = true;
+          selected_tour_country = event.snapshot.child('selected_tour').child('country').value.toString();
+          selected_tour_city = event.snapshot.child('selected_tour').child('city').value.toString();
+          selected_tour_budget = event.snapshot.child('selected_tour').child('budget').value.toString();
+        });
+      }
       int length = snapshot.children.length;
       for (int i = 0; i < length; i++) {
         int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
@@ -80,7 +94,6 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +150,11 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateTravelScreen()));
+                  if (is_travel) {
+
+                  } else {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateTravelScreen()));
+                  }
                 },
                 child: Container(
                   height: height * 0.25,
@@ -152,8 +169,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(top: height * 0.02),
-                        child: Text(is_travel ? 'Ваш план на день' : 'Создать путешествие', style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
-                      )
+                        child: Text(is_travel ? 'Ваше путешествие' : 'Создать путешествие', style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
+                      ),
+                      is_travel ? Container(
+                        child: Column(
+                          children: [
+                            Container(
+                              child: Text('Страна: ' + selected_tour_country, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                              alignment: Alignment.topLeft,
+                              margin: EdgeInsets.only(left: width * 0.02),
+                            ),
+                            Container(
+                              child: Text('Город: ' + selected_tour_city, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                              alignment: Alignment.topLeft,
+                              margin: EdgeInsets.only(left: width * 0.02),
+                            ),
+                            Container(
+                              child: Text('Бюджет: ' + selected_tour_budget, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                              alignment: Alignment.topLeft,
+                              margin: EdgeInsets.only(left: width * 0.02),
+                            ),
+                          ],
+                        ),
+                      ) : Container()
                     ],
                   ),
                 ),
@@ -283,30 +321,35 @@ class _HomeScreenState extends State<HomeScreen> {
             margin: EdgeInsets.only(left: width * 0.04, top: width * 0.02),
             child: Text('Туры, сгенерированные для вас', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
           ),
-          Container(
-            margin: EdgeInsets.only(left: width * 0.055, right: width * 0.055, top: height * 0.01),
-            height: height * 0.08,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: tours.length,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: width * 0.26,
-                  margin: EdgeInsets.only(right: width * 0.055),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFf0f0f0),
-                    borderRadius: BorderRadius.circular(14)
-                  ),
-                  padding: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.01),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
-                      Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),),
-                    ],
-                  ),
-                );
-              },
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (context) => GeneratedToursScreen()));
+            },
+            child: Container(
+              margin: EdgeInsets.only(left: width * 0.055, right: width * 0.055, top: height * 0.01),
+              height: height * 0.08,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: tours.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    width: width * 0.26,
+                    margin: EdgeInsets.only(right: width * 0.055),
+                    decoration: BoxDecoration(
+                        color: Color(0xFFf0f0f0),
+                        borderRadius: BorderRadius.circular(14)
+                    ),
+                    padding: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.01),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
+                        Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),),
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           Container(
