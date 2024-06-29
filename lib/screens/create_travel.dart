@@ -360,7 +360,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     style: BorderStyle.none
                   )
                 ),
-                hintText: 'Введите Ваши пожелания',
+                hintText: 'Введите Ваши пожелания, мы подберём для вас варианты',
                 fillColor: Colors.grey.shade300,
                 filled: true,
               ),

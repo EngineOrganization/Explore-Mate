@@ -2,6 +2,7 @@ import 'package:explore_mate/screens/create_travel.dart';
 import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:explore_mate/screens/map.dart';
 import 'package:explore_mate/screens/profile.dart';
+import 'package:explore_mate/screens/tour.dart';
 import 'package:flutter/material.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
@@ -30,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   GlobalKey mapKey = GlobalKey();
   Future<bool> get locationPermissionNotGranted async => !(await Permission.location.request().isGranted);
 
-  List functions = ['Ближайшие магазины', 'Перевести речь собеседника', 'Придумать равзлечение'];
-  List functions_icons = [Icons.shopping_basket_outlined, Icons.translate, Icons.attractions_outlined];
+  List functions = ['Ближайшие магазины', 'Перевести речь собеседника', 'Придумать равзлечение', 'Где поесть?'];
+  List functions_icons = [Icons.shopping_basket_outlined, Icons.translate, Icons.attractions_outlined, Icons.restaurant];
   final List<ChartData> chartData = [
     ChartData('чебуречная', 1),
     ChartData('абоба', 2),
@@ -151,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
               GestureDetector(
                 onTap: () {
                   if (is_travel) {
-
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => TourScreen()));
                   } else {
                     Navigator.of(context).push(MaterialPageRoute(builder: (context) => CreateTravelScreen()));
                   }
@@ -185,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               margin: EdgeInsets.only(left: width * 0.02),
                             ),
                             Container(
-                              child: Text('Бюджет: ' + selected_tour_budget, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                              child: Text('Бюджет: ' + selected_tour_budget, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold )),
                               alignment: Alignment.topLeft,
                               margin: EdgeInsets.only(left: width * 0.02),
                             ),
