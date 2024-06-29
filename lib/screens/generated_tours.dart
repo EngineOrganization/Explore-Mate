@@ -7,6 +7,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 
 class GeneratedToursScreen extends StatefulWidget {
 
@@ -38,6 +40,8 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
     get_generated_tours();
     mapController = MapController();
   }
+
+  final _controller = PageController();
 
   void get_generated_tours() async {
     await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
@@ -93,6 +97,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
       body: PageView.builder(
+        controller: _controller,
         itemCount: page_count,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, pageIndex) {
@@ -124,15 +129,16 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                           margin: EdgeInsets.only(right: 0.02),
                           width: width * 0.2,
                           height: height * 0.1,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: page_count,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                child: Icon(Icons.circle, color: index == pageIndex ? Colors.black : Colors.white),
-                              );
-                            },
-                          ),
+                          child: SmoothPageIndicator(
+                            controller: _controller,
+                            count: page_count,
+                            effect: ExpandingDotsEffect(
+                              activeDotColor: Colors.black,
+                              dotColor: Colors.white,
+                              dotHeight: 30,
+                              dotWidth: 30
+                            ),
+                          )
                         )
                       ],
                     )

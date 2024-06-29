@@ -258,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: height * 0.2,
                   child: TimelineTile(
                     isFirst: index == 0,
-                    isLast: index == 4,
+                    isLast: index == (tours_count - 1),
                     axis: TimelineAxis.horizontal,
                     beforeLineStyle: LineStyle(color: Colors.black),
                     indicatorStyle: IndicatorStyle(

@@ -50,6 +50,7 @@ dependencies:
   firebase_auth: ^5.1.1
   flutter_svg: ^2.0.10+1
   firebase_database: ^11.0.2
+  smooth_page_indicator: ^1.1.0
 
 dev_dependencies:
   flutter_test:
