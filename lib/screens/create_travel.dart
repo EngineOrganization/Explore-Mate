@@ -370,6 +370,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             margin: EdgeInsets.only(left: width * 0.3, right: width * 0.3, top: height * 0.02, bottom: height * 0.02),
             child: ElevatedButton(
               onPressed: () {
+                get_tours();
                 Navigator.of(context).push(MaterialPageRoute(builder: (context) => GeneratedToursScreen()));
               },
               style: ElevatedButton.styleFrom(

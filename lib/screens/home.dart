@@ -41,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<List<List<Map<String, String>>>> tours = [];
   List tours_countries = [];
   List tours_cities = [];
+  int tours_count = 0;
 
   @override
   void initState() {
@@ -55,24 +56,29 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     });
     DatabaseReference ref = FirebaseDatabase.instance.ref().child('users/' + user.uid + '/generated_tours');
-    final snapshot = await ref.get();
-    int length = snapshot.children.length;
-    for (int i = 0; i < length; i++) {
-      int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
-      tours.add([]);
-      tours_countries.add(snapshot.child(i.toString()).child('country').value.toString());
-      tours_cities.add(snapshot.child(i.toString()).child('city').value.toString());
-      for (int j = 0; j < daysLength; j++) {
-        int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children.length;
-        tours[i].add([]);
-        for (int k = 0; k < actionsLength; k++) {
-          tours[i][j].add({});
-          tours[i][j][k]['name'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('name').value.toString();
-          tours[i][j][k]['lat'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('lat').value.toString();
-          tours[i][j][k]['lon'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('lon').value.toString();
+    ref.onValue.listen((DatabaseEvent event) {
+      final snapshot = event.snapshot;
+      int length = snapshot.children.length;
+      for (int i = 0; i < length; i++) {
+        int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
+        tours.add([]);
+        tours_countries.add(snapshot.child(i.toString()).child('country').value.toString());
+        tours_cities.add(snapshot.child(i.toString()).child('city').value.toString());
+        for (int j = 0; j < daysLength; j++) {
+          int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children.length;
+          tours[i].add([]);
+          for (int k = 0; k < actionsLength; k++) {
+            tours[i][j].add({});
+            tours[i][j][k]['name'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('name').value.toString();
+            tours[i][j][k]['lat'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('lat').value.toString();
+            tours[i][j][k]['lon'] =  snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).child('Action ' + (k+1).toString()).child('lon').value.toString();
+          }
         }
       }
-    }
+      setState(() {
+        tours_count = tours.length;
+      });
+    });
   }
 
 
@@ -295,8 +301,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),),
-                      Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),),
+                      Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
+                      Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),),
                     ],
                   ),
                 );
