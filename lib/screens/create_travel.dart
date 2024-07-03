@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 
 class CreateTravelScreen extends StatefulWidget {
@@ -34,7 +35,9 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   DateTime travelDate = DateTime.now();
 
   List<String> countries = ['Не указано'];
+  List<String> countries_copy = ['Не указано'];
   List<String> cities = ['Не указано'];
+  List<String> cities_copy = ['Не указано'];
   Set<String> priority = {};
   String dropdownCountryTo = 'Не указано';
   String dropdownCityTo = 'Не указано';
@@ -44,7 +47,6 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   @override
   void initState() {
     super.initState();
-    connectToServer();
     getUser();
   }
 
@@ -84,49 +86,34 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
         user = _user!;
       });
     });
-  }
-
-  void connectToServer() async {
-    Socket.connect('192.168.1.6', 4048).then((Socket sock) {
-      socket = sock;
-      Map<String, dynamic> data = new Map<String, dynamic>();
-      data['type'] = 1;
-      socket.write(json.encode(data));
-      socket.listen((data) {
-        final String response = String.fromCharCodes(data);
-        List<dynamic> resp = json.decode(response);
-        setState(() {
-          countries = List<String>.from(resp as List);
-        });
-      },
-          cancelOnError: false);
-    }).catchError((e) {
-      print("Unable to connect: $e");
+    DatabaseReference ref = FirebaseDatabase.instance.ref().child('places');
+    ref.onValue.listen((DatabaseEvent event) {
+      countries = [];
+      final snapshot = event.snapshot;
+      int countries_len = snapshot.child('countries').child('countries').children.length;
+      for (int i = 0; i < countries_len; i++) {
+        countries.add(snapshot.child('countries').child('countries').child(i.toString()).value.toString());
+      }
+      setState(() {
+        countries_copy = countries;
+      });
     });
-    socket.close();
   }
 
 
   void get_cities() {
-    Socket.connect('192.168.1.6', 4048).then((Socket sock) {
-      socket = sock;
-      Map<String, dynamic> data = new Map<String, dynamic>();
-      data['type'] = 2;
-      data['data'] = dropdownCountryTo;
-      socket.write(json.encode(data));
-      socket.listen((data) {
-        final String response = String.fromCharCodes(data);
-        List<dynamic> resp = json.decode(response);
-        setState(() {
-          cities = List<String>.from(resp as List);
-          print(cities);
-        });
-      },
-          cancelOnError: false);
-    }).catchError((e) {
-      print("Unable to connect: $e");
+    DatabaseReference ref = FirebaseDatabase.instance.ref().child('places');
+    ref.onValue.listen((DatabaseEvent event) {
+      cities = ['Не указано'];
+      final snapshot = event.snapshot;
+      int cities_len = snapshot.child('countries').child(dropdownCountryTo).children.length;
+      snapshot.child('countries').child(dropdownCountryTo).children.forEach((city) {
+        cities.add(city.key.toString());
+      });
+      setState(() {
+        cities_copy = cities;
+      });
     });
-    socket.close();
   }
 
 
@@ -183,7 +170,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
               child: ButtonTheme(
                 alignedDropdown: true,
                 child: DropdownButton(
-                  menuMaxHeight: height * 0.5,
+                  menuMaxHeight: height * 0.45,
                   alignment: Alignment.center,
                   borderRadius: BorderRadius.circular(20),
                   value: dropdownCountryTo,
@@ -196,7 +183,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   },
                   icon: Icon(Icons.arrow_drop_down),
                   underline: SizedBox(),
-                  items: countries.map<DropdownMenuItem<String>>((String item) {
+                  items: countries_copy.map<DropdownMenuItem<String>>((String item) {
                     return DropdownMenuItem<String>(
                       value: item,
                       child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -220,7 +207,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                 child: ButtonTheme(
                   alignedDropdown: true,
                   child: DropdownButton(
-                    menuMaxHeight: height * 0.5,
+                    menuMaxHeight: height * 0.45,
                     alignment: Alignment.center,
                     borderRadius: BorderRadius.circular(20),
                     value: dropdownCityTo,
@@ -231,7 +218,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     },
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
-                    items: cities.map<DropdownMenuItem<String>>((String item) {
+                    items: cities_copy.map<DropdownMenuItem<String>>((String item) {
                       return DropdownMenuItem<String>(
                         value: item,
                         child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -462,7 +449,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     },
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
-                    items: countries.map<DropdownMenuItem<String>>((String item) {
+                    items: countries_copy.map<DropdownMenuItem<String>>((String item) {
                       return DropdownMenuItem<String>(
                         value: item,
                         child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -493,7 +480,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     },
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
-                    items: cities.map<DropdownMenuItem<String>>((String item) {
+                    items: cities_copy.map<DropdownMenuItem<String>>((String item) {
                       return DropdownMenuItem<String>(
                         value: item,
                         child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),

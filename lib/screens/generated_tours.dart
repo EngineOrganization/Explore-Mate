@@ -1,4 +1,5 @@
 import 'package:explore_mate/screens/home.dart';
+import 'package:explore_mate/screens/selection_movement.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -113,7 +114,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         Container(
                           margin: EdgeInsets.only(top: height * 0.03, left: width * 0.02),
@@ -126,7 +127,6 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                           ),
                         ),
                         Container(
-                          margin: EdgeInsets.only(right: 0.02),
                           width: width * 0.2,
                           height: height * 0.1,
                           child: SmoothPageIndicator(
@@ -183,16 +183,22 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                                 height: height * 0.15,
                                 width: width * 0.5,
                                 child: ListView.builder(
-                                  itemCount: tours_copy[pageIndex][dayIndex].length,
+                                  itemCount: dayIndex == 0 ? tours_copy[pageIndex][dayIndex].length + 1 : tours_copy[pageIndex][dayIndex].length,
                                   itemBuilder: (context, actionIndex) {
-                                    return Container(
-                                      margin: EdgeInsets.only(left: width * 0.01, top: height * 0.01),
-                                      padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.01, bottom: height * 0.01),
-                                      child: Text(tours_copy[pageIndex][dayIndex][actionIndex]['name']!, style: GoogleFonts.roboto(color: Colors.black, fontSize: 14),),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius: BorderRadius.circular(20)
+                                    return GestureDetector(
+                                      child:  Container(
+                                        margin: EdgeInsets.only(left: width * 0.01, top: height * 0.01),
+                                        padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.01, bottom: height * 0.01),
+                                        child: Text((dayIndex == 0 && actionIndex == 0) ? 'Выбрать способ перемещения' : tours_copy[pageIndex][dayIndex][dayIndex == 0 ? actionIndex - 1 : actionIndex]['name']!, style: GoogleFonts.roboto(color: Colors.black, fontSize: 14),),
+                                        decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.circular(20)
+                                        ),
                                       ),
+                                      onTap: () {
+                                        (dayIndex == 0 && actionIndex == 0) ?
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => SelectionMovement())) : Null;
+                                      },
                                     );
                                   },
                                 ),
