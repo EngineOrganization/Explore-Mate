@@ -390,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             alignment: Alignment.topRight,
             margin: EdgeInsets.only(right: width * 0.05, top: height * 0.01),
-            child: Text('Рейтинг кафе в вашем городе', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+            child: Text('Рейтинг кафе поблизости', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
           ),
           Container(
             height: height * 0.4,
