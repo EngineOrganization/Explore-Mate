@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,6 +16,7 @@ class CreateTravelScreen extends StatefulWidget {
 
 class _CreateTravelScreenState extends State<CreateTravelScreen> {
 
+
   late User user;
 
   late Socket socket;
@@ -23,16 +25,21 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   double day_value = 5;
   int people_type = 0;
   int budget_type = 0;
+  int fromOf_type = 0;
   List people = ['Один', 'Семья', 'Друзья', 'Влюблённые'];
   List priorities = ['Еда', 'Достопримечательности', 'Интересные места', 'Экстрим'];
+  List fromOf = ['Текущее местоположение', 'Другое место'];
   List priority_icons = [Icons.fastfood, Icons.museum, Icons.storefront, Icons.sports_motorsports];
   List budget = ['Маленький', 'Средний', 'Большой'];
+  DateTime travelDate = DateTime.now();
 
   List<String> countries = ['Не указано'];
   List<String> cities = ['Не указано'];
   Set<String> priority = {};
-  String dropdownCountry = 'Не указано';
-  String dropdownCity = 'Не указано';
+  String dropdownCountryTo = 'Не указано';
+  String dropdownCityTo = 'Не указано';
+  String dropdownCountryOf = 'Не указано';
+  String dropdownCityOf = 'Не указано';
 
   @override
   void initState() {
@@ -41,6 +48,35 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
     getUser();
   }
 
+
+  void selectDate() async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.black,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      }
+    );
+    if (picked != null) {
+      setState(() {
+        travelDate = picked;
+      });
+    }
+  }
 
   void getUser() async {
     await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
@@ -76,13 +112,14 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       socket = sock;
       Map<String, dynamic> data = new Map<String, dynamic>();
       data['type'] = 2;
-      data['data'] = dropdownCountry;
+      data['data'] = dropdownCountryTo;
       socket.write(json.encode(data));
       socket.listen((data) {
         final String response = String.fromCharCodes(data);
         List<dynamic> resp = json.decode(response);
         setState(() {
           cities = List<String>.from(resp as List);
+          print(cities);
         });
       },
           cancelOnError: false);
@@ -98,14 +135,15 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       socket = sock;
       Map<String, dynamic> data = new Map<String, dynamic>();
       data['type'] = 3;
-      data['country'] = dropdownCountry;
-      data['city'] = dropdownCity;
+      data['country'] = dropdownCountryOf;
+      data['city'] = dropdownCityOf;
       data['activity'] = activity_value.toString();
       data['people'] = people[people_type];
       data['priorities'] = priority.toString();
       data['countDay'] = day_value.toString();
       data['budget'] = budget[budget_type];
       data['uid'] = user.uid.toString();
+      data['travelDate'] = travelDate.toString().split(" ")[0];
       socket.write(json.encode(data));
       socket.listen((data) {
         final String response = String.fromCharCodes(data);
@@ -148,11 +186,11 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   menuMaxHeight: height * 0.5,
                   alignment: Alignment.center,
                   borderRadius: BorderRadius.circular(20),
-                  value: dropdownCountry,
+                  value: dropdownCountryTo,
                   onChanged: (String? value) {
                     setState(() {
-                      dropdownCountry = value!;
-                      dropdownCity = 'Не указано';
+                      dropdownCountryTo = value!;
+                      dropdownCityTo = 'Не указано';
                       get_cities();
                     });
                   },
@@ -185,10 +223,10 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     menuMaxHeight: height * 0.5,
                     alignment: Alignment.center,
                     borderRadius: BorderRadius.circular(20),
-                    value: dropdownCity,
+                    value: dropdownCityTo,
                     onChanged: (String? value) {
                       setState(() {
-                        dropdownCity = value!;
+                        dropdownCityTo = value!;
                       });
                     },
                     icon: Icon(Icons.arrow_drop_down),
@@ -341,6 +379,130 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                 },
               )
           ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
+            child: Text('Какого числа вы планируете начать путешествие?', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.4),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    selectDate();
+                  },
+                  child: Text('Выбрать дату начала путешествия'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.black
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
+                  child: Text(travelDate.toString().split(" ")[0], style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFedf0f8),
+                    borderRadius: BorderRadius.circular(30)
+                  ),
+                )
+              ],
+            )
+          ),
+          Container(
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
+            child: Text('Откуда вы начнёте путешествие?', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+          ),
+          Container(
+              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+              height: height * 0.05,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: fromOf.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: EdgeInsets.only(right: width * 0.02),
+                    child: ChoiceChip(
+                      checkmarkColor: Colors.white,
+                      label: Text(fromOf[index], style: GoogleFonts.roboto(color: fromOf_type == index ? Colors.white : Colors.black),),
+                      selected: fromOf_type == index,
+                      onSelected: (value) {
+                        setState(() {
+                          fromOf_type = index;
+                        });
+                      },
+                      selectedColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20)
+                      ),
+                    ),
+                  );
+                },
+              )
+          ),
+          fromOf[fromOf_type] == 'Другое место' ? Container(
+              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey, width: 2)
+              ),
+              child: Center(
+                child: ButtonTheme(
+                  alignedDropdown: true,
+                  child: DropdownButton(
+                    menuMaxHeight: height * 0.5,
+                    alignment: Alignment.center,
+                    borderRadius: BorderRadius.circular(20),
+                    value: dropdownCountryOf,
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownCountryOf = value!;
+                        dropdownCityOf = 'Не указано';
+                        get_cities();
+                      });
+                    },
+                    icon: Icon(Icons.arrow_drop_down),
+                    underline: SizedBox(),
+                    items: countries.map<DropdownMenuItem<String>>((String item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              )
+          ) : Container(),
+          fromOf[fromOf_type] == 'Другое место' ? Container(
+              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.grey, width: 2)
+              ),
+              child: Center(
+                child: ButtonTheme(
+                  alignedDropdown: true,
+                  child: DropdownButton(
+                    menuMaxHeight: height * 0.5,
+                    alignment: Alignment.center,
+                    borderRadius: BorderRadius.circular(20),
+                    value: dropdownCityOf,
+                    onChanged: (String? value) {
+                      setState(() {
+                        dropdownCityOf = value!;
+                      });
+                    },
+                    icon: Icon(Icons.arrow_drop_down),
+                    underline: SizedBox(),
+                    items: cities.map<DropdownMenuItem<String>>((String item) {
+                      return DropdownMenuItem<String>(
+                        value: item,
+                        child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              )
+          ) : Container(),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
             child: Text('Напишите всё, что вы хотите видеть в своем туре', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),

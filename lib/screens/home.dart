@@ -2,6 +2,7 @@ import 'package:explore_mate/screens/create_travel.dart';
 import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:explore_mate/screens/map.dart';
 import 'package:explore_mate/screens/profile.dart';
+import 'package:explore_mate/screens/subscription.dart';
 import 'package:explore_mate/screens/tour.dart';
 import 'package:flutter/material.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -49,6 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
   String selected_tour_city = '';
   String selected_tour_budget = '';
 
+  bool user_initializated = false;
+
   @override
   void initState() {
     super.initState();
@@ -59,6 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
       setState(() {
         user = _user!;
+        user_initializated = true;
       });
     });
     DatabaseReference ref = FirebaseDatabase.instance.ref().child('users/' + user.uid);
@@ -120,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
+                      user_initializated ? Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           CircleAvatar(
@@ -129,17 +133,40 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           Container(
                             margin: EdgeInsets.only(left: width * 0.02),
-                            child: Text('Иван И.', style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
+                            child: Text(user.email.toString(), style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
                           )
                         ],
-                      )
+                      ) : CircularProgressIndicator(color: Colors.black,)
                     ],
                   ),
                 ),
               ),
-              Container(
-                margin: EdgeInsets.only(right: width * 0.05),
-                child: Image.asset('assets/explore_mate.png', width: width * 0.2,),
+              GestureDetector(
+                child: Container(
+                  margin: EdgeInsets.only(right: width * 0.05, top: height * 0.02),
+                  padding: EdgeInsets.only(left: 10, right: 10, top: 8, bottom: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        child: Text('Осталось туров', style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(left: width * 0.02),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.black,
+                          child: Text('0', style: GoogleFonts.roboto(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),),
+                        ),
+                      )
+                    ],
+                  ),
+                  decoration: BoxDecoration(
+                      color: Color(0xFFf0f0f0),
+                      borderRadius: BorderRadius.circular(30)
+                  ),
+                ),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => SubscriptionScreen()));
+                },
               )
             ],
           ),
@@ -242,46 +269,53 @@ class _HomeScreenState extends State<HomeScreen> {
               )
             ],
           ),
-          Container(
-            margin: EdgeInsets.only(left: width * 0.1, top: width * 0.02),
-            child: Text('Сверимся?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),),
-          ),
-          Container(
-            height: height * 0.2,
-            margin: EdgeInsets.only(left: width * 0.06, right: width * 0.06, top: height * 0.02),
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return Container(
-                  width: width * 0.3,
+          selected_tour_country != '' ?  Container(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(left: width * 0.1, top: width * 0.02),
+                  child: Text('Сверимся?', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),),
+                ),
+                Container(
                   height: height * 0.2,
-                  child: TimelineTile(
-                    isFirst: index == 0,
-                    isLast: index == (tours_count - 1),
-                    axis: TimelineAxis.horizontal,
-                    beforeLineStyle: LineStyle(color: Colors.black),
-                    indicatorStyle: IndicatorStyle(
-                        width: 50,
-                        color: Colors.black
-                    ),
-                    endChild: Container(
-                      margin: EdgeInsets.only(right: width * 0.03, top: height * 0.01),
-                      width: width * 0.3,
-                      decoration: BoxDecoration(
-                        color: Color(0xFFedf0f8),
-                        borderRadius: BorderRadius.circular(20)
-                      ),
-                      child: Container(
-                        margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
-                        child: Text('Text', style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
-                      ),
-                    ),
+                  margin: EdgeInsets.only(left: width * 0.06, right: width * 0.06, top: height * 0.02),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: 5,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        width: width * 0.3,
+                        height: height * 0.2,
+                        child: TimelineTile(
+                          isFirst: index == 0,
+                          isLast: index == (tours_count - 1),
+                          axis: TimelineAxis.horizontal,
+                          beforeLineStyle: LineStyle(color: Colors.black),
+                          indicatorStyle: IndicatorStyle(
+                              width: 50,
+                              color: Colors.black
+                          ),
+                          endChild: Container(
+                            margin: EdgeInsets.only(right: width * 0.03, top: height * 0.01),
+                            width: width * 0.3,
+                            decoration: BoxDecoration(
+                                color: Color(0xFFedf0f8),
+                                borderRadius: BorderRadius.circular(20)
+                            ),
+                            child: Container(
+                              margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
+                              child: Text('Text', style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ],
             ),
-          ),
+          ) : Container(),
           Container(
             margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05, top: height * 0.01),
             height: height * 0.2,
@@ -318,10 +352,10 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
-          Container(
+          tours.isNotEmpty ? Container(
             margin: EdgeInsets.only(left: width * 0.04, top: width * 0.02),
             child: Text('Туры, сгенерированные для вас', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
-          ),
+          ) : Container(),
           GestureDetector(
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(builder: (context) => GeneratedToursScreen()));

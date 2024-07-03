@@ -176,7 +176,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                             children: [
                               Container(
                                 margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
-                                child: Text('День ' + (dayIndex + 1).toString(), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+                                child: Text(dayIndex == 0 ? 'День ' + (dayIndex + 1).toString() + ' / Начало путешествия' : (dayIndex == tours_copy[pageIndex].length - 1 ? 'День ' + (dayIndex + 1).toString() + ' / Возращение обратно' : 'День ' + (dayIndex + 1).toString()), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
                               ),
                               Container(
                                 margin: EdgeInsets.only(left: width * 0.01),

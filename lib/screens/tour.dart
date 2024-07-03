@@ -24,6 +24,9 @@ class _TourScreenState extends State<TourScreen> {
   String tour_country = '';
   String tour_city = '';
 
+  List<List<Marker>> markers = [];
+  List<List<Marker>> markers_copy = [];
+
   int selected_day = 0;
 
 
@@ -54,15 +57,20 @@ class _TourScreenState extends State<TourScreen> {
       for (int i = 0; i < daysLength; i++) {
         int actionsLength = snapshot.child('Trip').child('Day ' + (i+1).toString()).children.length;
         tour.add([]);
+        markers.add([]);
         for (int j = 0; j < actionsLength; j++) {
           tour[i].add({});
           tour[i][j]['name'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('name').value.toString();
           tour[i][j]['lat'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('lat').value.toString();
           tour[i][j]['lon'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('lon').value.toString();
+          markers[i].add(Marker(point: LatLng(double.parse(tour[i][j]['lat'].toString()), double.parse(tour[i][j]['lon'].toString())), child: Container(
+            child: Icon(Icons.place, size: 40,),
+          )));
         }
       }
       setState(() {
         tour_copy = tour;
+        markers_copy = markers;
       });
     });
   }
@@ -77,19 +85,24 @@ class _TourScreenState extends State<TourScreen> {
           Container(
             width: width,
             height: height * 0.5,
-            child: FlutterMap(
+            child: markers_copy.length > 0 ? FlutterMap(
               mapController: mapController,
               options: MapOptions(
-                initialCenter: LatLng(51.509364, -0.128928),
-                initialZoom: 9.2,
+                initialCenter: markers_copy[selected_day][0].point,
+                initialZoom: 13,
               ),
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   userAgentPackageName: 'com.engine.explore_mate',
                 ),
+                MarkerLayer(markers: markers_copy[selected_day])
               ],
-            ),
+            ) : Center(
+              child: CircularProgressIndicator(
+                color: Colors.black,
+              ),
+            )
           ),
           tour_copy.isNotEmpty ? Container(
             height: height * 0.5,
@@ -170,8 +183,24 @@ class _TourScreenState extends State<TourScreen> {
                                 borderRadius: BorderRadius.circular(20)
                             ),
                             child: Container(
-                              margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
-                              child: Text(tour_copy[selected_day][index]['name'].toString(), style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
+                              margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    child: IconButton(
+                                      icon: Icon(Icons.pin_drop, size: 30,),
+                                      onPressed: () {
+                                        setState(() {
+                                          mapController.move(markers[selected_day][index].point, 14);
+                                        });
+                                      },
+                                      color: Colors.black,
+                                    ),
+                                    alignment: Alignment.topRight,
+                                  ),
+                                  Text(tour_copy[selected_day][index]['name'].toString(), style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),)
+                                ],
+                              ),
                             ),
                           ),
                         ),
