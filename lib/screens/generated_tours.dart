@@ -236,7 +236,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                                         ),
                                       ),
                                       onTap: () {
-                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => TicketsScreen(ourId: pageIndex)));
+                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => TicketsScreen(planesTo_copy: planesTo_copy, trainsTo_copy: trainsTo_copy,)));
                                       },
                                     ) : GestureDetector(
                                       child:  Container(
