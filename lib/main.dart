@@ -2,6 +2,7 @@ import 'package:explore_mate/screens/cafe.dart';
 import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:explore_mate/screens/home.dart';
 import 'package:explore_mate/screens/login.dart';
+import 'package:explore_mate/screens/test.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';

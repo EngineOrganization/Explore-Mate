@@ -34,17 +34,22 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   List budget = ['Маленький', 'Средний', 'Большой'];
   DateTime travelDate = DateTime.now();
 
-  List<String> countries = ['Не указано'];
-  List<String> countries_copy = ['Не указано'];
-  List<String> cities_to = ['Не указано'];
-  List<String> cities_copy_to = ['Не указано'];
-  List<String> cities_of = ['Не указано'];
-  List<String> cities_copy_of = ['Не указано'];
+  List<String> countries = [];
+  List<String> countries_copy = [];
+  List<String> cities_to = [];
+  List<String> cities_copy_to = [];
+  List<String> cities_of = [];
+  List<String> cities_copy_of = [];
   Set<String> priority = {};
-  String dropdownCountryTo = 'Не указано';
-  String dropdownCityTo = 'Не указано';
-  String dropdownCountryOf = 'Не указано';
-  String dropdownCityOf = 'Не указано';
+  String? dropdownCountryTo;
+  String? dropdownCityTo;
+  String? dropdownCountryOf;
+  String? dropdownCityOf;
+
+  final TextEditingController textEditingControllerCountryTo = TextEditingController();
+  final TextEditingController textEditingControllerCityTo = TextEditingController();
+  final TextEditingController textEditingControllerCountryOf = TextEditingController();
+  final TextEditingController textEditingControllerCityOf = TextEditingController();
 
   @override
   void initState() {
@@ -108,8 +113,8 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
     ref.onValue.listen((DatabaseEvent event) {
       to ? cities_to = ['Не указано'] : cities_of = ['Не указано'];
       final snapshot = event.snapshot;
-      int cities_len = snapshot.child('countries').child(to ? dropdownCountryTo : dropdownCountryOf).children.length;
-      snapshot.child('countries').child(to ? dropdownCountryTo : dropdownCountryOf).children.forEach((city) {
+      int cities_len = snapshot.child('countries').child(to ? dropdownCountryTo! : dropdownCountryOf!).children.length;
+      snapshot.child('countries').child(to ? dropdownCountryTo! : dropdownCountryOf!).children.forEach((city) {
         to ? cities_to.add(city.key.toString()) : cities_of.add(city.key.toString());
       });
       setState(() {
@@ -165,72 +170,157 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             child: Text('Страна', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+            padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, bottom: height * 0.005, top: height * 0.005),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey, width: 2)
+                borderRadius: BorderRadius.circular(20),
+                color: Color(0xFFedf0f8)
             ),
-            child: Center(
-              child: ButtonTheme(
-                alignedDropdown: true,
-                child: DropdownButton(
-                  menuMaxHeight: height * 0.45,
-                  alignment: Alignment.center,
-                  borderRadius: BorderRadius.circular(20),
-                  value: dropdownCountryTo,
-                  onChanged: (String? value) {
-                    setState(() {
-                      dropdownCountryTo = value!;
-                      dropdownCityTo = 'Не указано';
-                      get_cities(true);
-                    });
-                  },
-                  icon: Icon(Icons.arrow_drop_down),
-                  underline: SizedBox(),
-                  items: countries_copy.map<DropdownMenuItem<String>>((String item) {
-                    return DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
-                    );
-                  }).toList(),
+            child: DropdownButton2(
+              isExpanded: true,
+              value: dropdownCountryTo,
+              hint: Text(
+                'Select country',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).hintColor,
                 ),
               ),
-            )
+              items: countries_copy.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  dropdownCountryTo = value.toString();
+                  get_cities(true);
+                });
+              },
+              buttonStyleData: ButtonStyleData(
+                width: width * 0.5,
+              ),
+              dropdownStyleData: DropdownStyleData(
+                maxHeight: height * 0.4
+              ),
+              underline: Container(),
+              dropdownSearchData: DropdownSearchData(
+                  searchController: textEditingControllerCountryTo,
+                  searchInnerWidgetHeight: 60,
+                  searchInnerWidget: Container(
+                    height: 60,
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 4,
+                      right: 8,
+                      left: 8,
+                    ),
+                    child: TextFormField(
+                      expands: true,
+                      maxLines: null,
+                      controller: textEditingControllerCountryTo,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xFFedf0f8),
+                          prefixIcon: Icon(Icons.search),
+                          isDense: true,
+                          hintText: 'Find a place',
+                          hintStyle: TextStyle(fontSize: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                      ),
+                    ),
+                  ),
+                  searchMatchFn: (item, searchValue) {
+                    return item.value.toString().contains(searchValue);
+                  }
+              ),
+              onMenuStateChange: (isOpen) {
+                if (!isOpen) {
+                  textEditingControllerCountryTo.clear();
+                }
+              },
+            ),
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
             child: Text('Город', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
-              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey, width: 2)
-              ),
-              child: Center(
-                child: ButtonTheme(
-                  alignedDropdown: true,
-                  child: DropdownButton(
-                    menuMaxHeight: height * 0.45,
-                    alignment: Alignment.center,
-                    borderRadius: BorderRadius.circular(20),
-                    value: dropdownCityTo,
-                    onChanged: (String? value) {
-                      setState(() {
-                        dropdownCityTo = value!;
-                      });
-                    },
-                    icon: Icon(Icons.arrow_drop_down),
-                    underline: SizedBox(),
-                    items: cities_copy_to.map<DropdownMenuItem<String>>((String item) {
-                      return DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
-                      );
-                    }).toList(),
-                  ),
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+            padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, bottom: height * 0.005, top: height * 0.005),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Color(0xFFedf0f8)
+            ),
+            child: DropdownButton2(
+              isExpanded: true,
+              value: dropdownCityTo,
+              hint: Text(
+                'Select city',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).hintColor,
                 ),
-              )
+              ),
+              items: cities_copy_to.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  dropdownCityTo = value.toString();
+                });
+              },
+              buttonStyleData: ButtonStyleData(
+                width: width * 0.5,
+              ),
+              dropdownStyleData: DropdownStyleData(
+                  maxHeight: height * 0.4
+              ),
+              underline: Container(),
+              dropdownSearchData: DropdownSearchData(
+                  searchController: textEditingControllerCityTo,
+                  searchInnerWidgetHeight: 60,
+                  searchInnerWidget: Container(
+                    height: 60,
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 4,
+                      right: 8,
+                      left: 8,
+                    ),
+                    child: TextFormField(
+                      expands: true,
+                      maxLines: null,
+                      controller: textEditingControllerCityTo,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xFFedf0f8),
+                          prefixIcon: Icon(Icons.search),
+                          isDense: true,
+                          hintText: 'Find a place',
+                          hintStyle: TextStyle(fontSize: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                      ),
+                    ),
+                  ),
+                  searchMatchFn: (item, searchValue) {
+                    return item.value.toString().contains(searchValue);
+                  }
+              ),
+              onMenuStateChange: (isOpen) {
+                if (!isOpen) {
+                  textEditingControllerCityTo.clear();
+                }
+              },
+            ),
           ),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.03),
@@ -431,68 +521,153 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
               )
           ),
           fromOf[fromOf_type] == 'Другое место' ? Container(
-              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey, width: 2)
-              ),
-              child: Center(
-                child: ButtonTheme(
-                  alignedDropdown: true,
-                  child: DropdownButton(
-                    menuMaxHeight: height * 0.45,
-                    alignment: Alignment.center,
-                    borderRadius: BorderRadius.circular(20),
-                    value: dropdownCountryOf,
-                    onChanged: (String? value) {
-                      setState(() {
-                        dropdownCountryOf = value!;
-                        dropdownCityOf = 'Не указано';
-                        get_cities(false);
-                      });
-                    },
-                    icon: Icon(Icons.arrow_drop_down),
-                    underline: SizedBox(),
-                    items: countries_copy.map<DropdownMenuItem<String>>((String item) {
-                      return DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
-                      );
-                    }).toList(),
-                  ),
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+            padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, bottom: height * 0.005, top: height * 0.005),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Color(0xFFedf0f8)
+            ),
+            child: DropdownButton2(
+              isExpanded: true,
+              value: dropdownCountryOf,
+              hint: Text(
+                'Select country',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).hintColor,
                 ),
-              )
+              ),
+              items: countries_copy.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  dropdownCountryOf = value.toString();
+                  get_cities(false);
+                });
+              },
+              buttonStyleData: ButtonStyleData(
+                width: width * 0.5,
+              ),
+              dropdownStyleData: DropdownStyleData(
+                  maxHeight: height * 0.4
+              ),
+              underline: Container(),
+              dropdownSearchData: DropdownSearchData(
+                  searchController: textEditingControllerCountryOf,
+                  searchInnerWidgetHeight: 60,
+                  searchInnerWidget: Container(
+                    height: 60,
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 4,
+                      right: 8,
+                      left: 8,
+                    ),
+                    child: TextFormField(
+                      expands: true,
+                      maxLines: null,
+                      controller: textEditingControllerCountryOf,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xFFedf0f8),
+                          prefixIcon: Icon(Icons.search),
+                          isDense: true,
+                          hintText: 'Find a place',
+                          hintStyle: TextStyle(fontSize: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                      ),
+                    ),
+                  ),
+                  searchMatchFn: (item, searchValue) {
+                    return item.value.toString().contains(searchValue);
+                  }
+              ),
+              onMenuStateChange: (isOpen) {
+                if (!isOpen) {
+                  textEditingControllerCountryOf.clear();
+                }
+              },
+            ),
           ) : Container(),
           fromOf[fromOf_type] == 'Другое место' ? Container(
-              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5, top: height * 0.01),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.grey, width: 2)
-              ),
-              child: Center(
-                child: ButtonTheme(
-                  alignedDropdown: true,
-                  child: DropdownButton(
-                    menuMaxHeight: height * 0.5,
-                    alignment: Alignment.center,
-                    borderRadius: BorderRadius.circular(20),
-                    value: dropdownCityOf,
-                    onChanged: (String? value) {
-                      setState(() {
-                        dropdownCityOf = value!;
-                      });
-                    },
-                    icon: Icon(Icons.arrow_drop_down),
-                    underline: SizedBox(),
-                    items: cities_copy_of.map<DropdownMenuItem<String>>((String item) {
-                      return DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
-                      );
-                    }).toList(),
-                  ),
+            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+            padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, bottom: height * 0.005, top: height * 0.005),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                color: Color(0xFFedf0f8)
+            ),
+            child: DropdownButton2(
+              isExpanded: true,
+              value: dropdownCityOf,
+              hint: Text(
+                'Select city',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).hintColor,
                 ),
-              )
+              ),
+              items: cities_copy_of.map<DropdownMenuItem<String>>((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  dropdownCityOf = value.toString();
+                });
+              },
+              buttonStyleData: ButtonStyleData(
+                width: width * 0.5,
+              ),
+              dropdownStyleData: DropdownStyleData(
+                  maxHeight: height * 0.4
+              ),
+              underline: Container(),
+              dropdownSearchData: DropdownSearchData(
+                  searchController: textEditingControllerCityOf,
+                  searchInnerWidgetHeight: 60,
+                  searchInnerWidget: Container(
+                    height: 60,
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 4,
+                      right: 8,
+                      left: 8,
+                    ),
+                    child: TextFormField(
+                      expands: true,
+                      maxLines: null,
+                      controller: textEditingControllerCityOf,
+                      decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Color(0xFFedf0f8),
+                          prefixIcon: Icon(Icons.search),
+                          isDense: true,
+                          hintText: 'Find a place',
+                          hintStyle: TextStyle(fontSize: 14),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          )
+                      ),
+                    ),
+                  ),
+                  searchMatchFn: (item, searchValue) {
+                    return item.value.toString().contains(searchValue);
+                  }
+              ),
+              onMenuStateChange: (isOpen) {
+                if (!isOpen) {
+                  textEditingControllerCityOf.clear();
+                }
+              },
+            ),
           ) : Container(),
           Container(
             margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),

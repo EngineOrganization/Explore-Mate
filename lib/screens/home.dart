@@ -81,8 +81,8 @@ class _HomeScreenState extends State<HomeScreen> {
       for (int i = 0; i < length; i++) {
         int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
         tours.add([]);
-        tours_countries.add(snapshot.child(i.toString()).child('country').value.toString());
-        tours_cities.add(snapshot.child(i.toString()).child('city').value.toString());
+        tours_countries.add(snapshot.child(i.toString()).child('countryTo').value.toString());
+        tours_cities.add(snapshot.child(i.toString()).child('cityTo').value.toString());
         for (int j = 0; j < daysLength; j++) {
           int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children.length;
           tours[i].add([]);
