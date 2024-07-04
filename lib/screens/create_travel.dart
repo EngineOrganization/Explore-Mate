@@ -1,11 +1,11 @@
 import 'dart:convert';
-import 'dart:math';
 import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 
 class CreateTravelScreen extends StatefulWidget {
@@ -36,8 +36,10 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
 
   List<String> countries = ['Не указано'];
   List<String> countries_copy = ['Не указано'];
-  List<String> cities = ['Не указано'];
-  List<String> cities_copy = ['Не указано'];
+  List<String> cities_to = ['Не указано'];
+  List<String> cities_copy_to = ['Не указано'];
+  List<String> cities_of = ['Не указано'];
+  List<String> cities_copy_of = ['Не указано'];
   Set<String> priority = {};
   String dropdownCountryTo = 'Не указано';
   String dropdownCityTo = 'Не указано';
@@ -101,17 +103,17 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   }
 
 
-  void get_cities() {
+  void get_cities(bool to) {
     DatabaseReference ref = FirebaseDatabase.instance.ref().child('places');
     ref.onValue.listen((DatabaseEvent event) {
-      cities = ['Не указано'];
+      to ? cities_to = ['Не указано'] : cities_of = ['Не указано'];
       final snapshot = event.snapshot;
-      int cities_len = snapshot.child('countries').child(dropdownCountryTo).children.length;
-      snapshot.child('countries').child(dropdownCountryTo).children.forEach((city) {
-        cities.add(city.key.toString());
+      int cities_len = snapshot.child('countries').child(to ? dropdownCountryTo : dropdownCountryOf).children.length;
+      snapshot.child('countries').child(to ? dropdownCountryTo : dropdownCountryOf).children.forEach((city) {
+        to ? cities_to.add(city.key.toString()) : cities_of.add(city.key.toString());
       });
       setState(() {
-        cities_copy = cities;
+        to ? cities_copy_to = cities_to : cities_copy_of = cities_of;
       });
     });
   }
@@ -122,8 +124,10 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       socket = sock;
       Map<String, dynamic> data = new Map<String, dynamic>();
       data['type'] = 3;
-      data['country'] = dropdownCountryOf;
-      data['city'] = dropdownCityOf;
+      data['countryTo'] = dropdownCountryTo;
+      data['cityTo'] = dropdownCityTo;
+      data['countryOf'] = dropdownCountryOf;
+      data['cityOf'] = dropdownCityOf;
       data['activity'] = activity_value.toString();
       data['people'] = people[people_type];
       data['priorities'] = priority.toString();
@@ -178,7 +182,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     setState(() {
                       dropdownCountryTo = value!;
                       dropdownCityTo = 'Не указано';
-                      get_cities();
+                      get_cities(true);
                     });
                   },
                   icon: Icon(Icons.arrow_drop_down),
@@ -218,7 +222,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     },
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
-                    items: cities_copy.map<DropdownMenuItem<String>>((String item) {
+                    items: cities_copy_to.map<DropdownMenuItem<String>>((String item) {
                       return DropdownMenuItem<String>(
                         value: item,
                         child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -436,7 +440,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                 child: ButtonTheme(
                   alignedDropdown: true,
                   child: DropdownButton(
-                    menuMaxHeight: height * 0.5,
+                    menuMaxHeight: height * 0.45,
                     alignment: Alignment.center,
                     borderRadius: BorderRadius.circular(20),
                     value: dropdownCountryOf,
@@ -444,7 +448,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                       setState(() {
                         dropdownCountryOf = value!;
                         dropdownCityOf = 'Не указано';
-                        get_cities();
+                        get_cities(false);
                       });
                     },
                     icon: Icon(Icons.arrow_drop_down),
@@ -480,7 +484,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                     },
                     icon: Icon(Icons.arrow_drop_down),
                     underline: SizedBox(),
-                    items: cities_copy.map<DropdownMenuItem<String>>((String item) {
+                    items: cities_copy_of.map<DropdownMenuItem<String>>((String item) {
                       return DropdownMenuItem<String>(
                         value: item,
                         child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
