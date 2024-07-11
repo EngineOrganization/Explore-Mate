@@ -13,7 +13,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 
-
 class HomeScreen extends StatefulWidget {
 
   @override
@@ -244,16 +243,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       margin: EdgeInsets.only(top: height * 0.02),
                       child: Text('Быстрые функции', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
                     ),
-                    Container(
-                      width: width * 0.4,
-                      height: height * 0.2,
+                    Expanded(
                       child: ListView.builder(
                         itemCount: functions.length,
                         itemBuilder: (context, index) {
                           return Container(
-                            height: height * 0.04,
-                            padding: EdgeInsets.only(left: 20, right: 20, top: 8, bottom: 8),
-                            margin: EdgeInsets.only(top: height * 0.01),
+                            padding: EdgeInsets.only(left: 20, right: 20, top: 12, bottom: 12),
+                            margin: EdgeInsets.only(top: height * 0.01, left: width * 0.01, right: width * 0.01),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20)

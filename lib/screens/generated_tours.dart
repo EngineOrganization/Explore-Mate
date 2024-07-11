@@ -178,14 +178,14 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
               ),
               Container(
                 width: width,
-                height: height * 0.25 * 5,
+                height: height * 0.25 * tours_copy[pageIndex].length + height * 0.05,
                 padding: EdgeInsets.only(left: width * 0.1, right: width * 0.1),
                 child: ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: tours_copy[pageIndex].length,
                   itemBuilder: (context, dayIndex) {
                     return Container(
-                      height: height * 0.25,
+                      height: height * tours_copy[dayIndex].length * 0.05,
                       child: TimelineTile(
                         isFirst: dayIndex == 0,
                         isLast: dayIndex == 4,
@@ -196,8 +196,8 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                         ),
                         alignment: TimelineAlign.end,
                         startChild: Container(
-                          margin: EdgeInsets.only(right: width * 0.05),
-                          height: height * 0.2,
+                          margin: EdgeInsets.only(right: width * 0.05, top: height * 0.05),
+                          height: height * 0.25,
                           decoration: BoxDecoration(
                               color: Color(0xFFf0f0f0),
                               borderRadius: BorderRadius.circular(20)
@@ -219,8 +219,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                                     return GestureDetector(
                                       child:  Container(
                                         margin: EdgeInsets.only(left: width * 0.01, top: height * 0.01),
-                                        padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.01, bottom: height * 0.01),
-                                        height: height * 0.05,
+                                        padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.02, bottom: height * 0.02),
                                         child: Text(tours_copy[pageIndex][dayIndex][actionIndex]['name']!, style: GoogleFonts.roboto(color: Colors.black, fontSize: 12),),
                                         decoration: BoxDecoration(
                                             color: Colors.white,
