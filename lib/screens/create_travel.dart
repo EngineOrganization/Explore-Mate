@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:explore_mate/screens/generated_tours.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,12 +35,12 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   List budget = ['Маленький', 'Средний', 'Большой'];
   DateTime travelDate = DateTime.now();
 
-  List<String> countries = [];
-  List<String> countries_copy = [];
-  List<String> cities_to = [];
-  List<String> cities_copy_to = [];
-  List<String> cities_of = [];
-  List<String> cities_copy_of = [];
+  Map<String, Map<String, String>> countries = {};
+  Map<String, Map<String, String>> countries_copy = {};
+  Map<String, String> cities_to = {};
+  Map<String, String> cities_copy_to = {};
+  Map<String, String> cities_of = {};
+  Map<String, String> cities_copy_of = {};
   Set<String> priority = {};
   String? dropdownCountryTo;
   String? dropdownCityTo;
@@ -95,12 +96,11 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
     });
     DatabaseReference ref = FirebaseDatabase.instance.ref().child('places');
     ref.onValue.listen((DatabaseEvent event) {
-      countries = [];
+      countries = {};
       final snapshot = event.snapshot;
-      int countries_len = snapshot.child('countries').child('countries').children.length;
-      for (int i = 0; i < countries_len; i++) {
-        countries.add(snapshot.child('countries').child('countries').child(i.toString()).value.toString());
-      }
+      snapshot.child('countries').children.forEach((country) {
+        countries[country.child('name').value.toString()] = {'code': country.key.toString(), 'flag': country.child('flag').value.toString()};
+      });
       setState(() {
         countries_copy = countries;
       });
@@ -111,11 +111,10 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
   void get_cities(bool to) {
     DatabaseReference ref = FirebaseDatabase.instance.ref().child('places');
     ref.onValue.listen((DatabaseEvent event) {
-      to ? cities_to = ['Не указано'] : cities_of = ['Не указано'];
       final snapshot = event.snapshot;
-      int cities_len = snapshot.child('countries').child(to ? dropdownCountryTo! : dropdownCountryOf!).children.length;
-      snapshot.child('countries').child(to ? dropdownCountryTo! : dropdownCountryOf!).children.forEach((city) {
-        to ? cities_to.add(city.key.toString()) : cities_of.add(city.key.toString());
+      to ? cities_to = {} : cities_of = {};
+      snapshot.child('countries').child(countries[to ? dropdownCountryTo.toString() : dropdownCountryOf.toString()]!['code'].toString()).child('cities').children.forEach((city) {
+        to ? cities_to[city.key.toString()] = city.value.toString() : cities_of[city.key.toString()] = city.value.toString();
       });
       setState(() {
         to ? cities_copy_to = cities_to : cities_copy_of = cities_of;
@@ -125,7 +124,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
 
 
   void get_tours() {
-    Socket.connect('192.168.1.6', 4048).then((Socket sock) {
+    Socket.connect('192.168.1.4', 4048).then((Socket sock) {
       socket = sock;
       Map<String, dynamic> data = new Map<String, dynamic>();
       data['type'] = 3;
@@ -133,6 +132,8 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       data['cityTo'] = dropdownCityTo;
       data['countryOf'] = dropdownCountryOf;
       data['cityOf'] = dropdownCityOf;
+      data['iata_of'] = cities_of[dropdownCityOf];
+      data['iata_to'] = cities_of[dropdownCityTo];
       data['activity'] = activity_value.toString();
       data['people'] = people[people_type];
       data['priorities'] = priority.toString();
@@ -140,6 +141,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       data['budget'] = budget[budget_type];
       data['uid'] = user.uid.toString();
       data['travelDate'] = travelDate.toString().split(" ")[0];
+      data['countryCode'] = countries[dropdownCountryTo]!['code'];
       socket.write(json.encode(data));
       socket.listen((data) {
         final String response = String.fromCharCodes(data);
@@ -186,10 +188,20 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   color: Theme.of(context).hintColor,
                 ),
               ),
-              items: countries_copy.map<DropdownMenuItem<String>>((String item) {
+              items: countries_copy.keys.map<DropdownMenuItem<String>>((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
-                  child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(item, style: GoogleFonts.roboto(color: Colors.black),),
+                      Container(
+                        height: 15,
+                        width: 25,
+                        child: SvgPicture.network(countries_copy[item]!['flag'].toString(), fit: BoxFit.fill,),
+                      )
+                    ],
+                  ),
                 );
               }).toList(),
               onChanged: (value) {
@@ -265,7 +277,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   color: Theme.of(context).hintColor,
                 ),
               ),
-              items: cities_copy_to.map<DropdownMenuItem<String>>((String item) {
+              items: cities_copy_to.keys.map<DropdownMenuItem<String>>((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
                   child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -465,25 +477,26 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             child: Text('Какого числа вы планируете начать путешествие?', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.02, right: width * 0.4),
+            margin: EdgeInsets.only(left: width * 0.02),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 OutlinedButton(
                   onPressed: () {
                     selectDate();
                   },
-                  child: Text('Выбрать дату начала путешествия'),
+                  child: Text('Выбрать дату начала путешествия', style: TextStyle(fontSize: 10),),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.black
+                    foregroundColor: Colors.black,
+                    padding: EdgeInsets.only(top: 2, bottom: 2, left: 4, right: 4)
                   ),
                 ),
                 Container(
-                  padding: EdgeInsets.only(left: 8, right: 8, top: 2, bottom: 2),
-                  child: Text(travelDate.toString().split(" ")[0], style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20),),
+                  padding: EdgeInsets.only(left: 8, right: 8, top: 4, bottom: 4),
+                  margin: EdgeInsets.only(left: width * 0.1),
+                  child: Text(travelDate.toString().split(" ")[0], style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18),),
                   decoration: BoxDecoration(
                     color: Color(0xFFedf0f8),
-                    borderRadius: BorderRadius.circular(30)
+                    borderRadius: BorderRadius.circular(20)
                   ),
                 )
               ],
@@ -494,7 +507,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             child: Text('Откуда вы начнёте путешествие?', style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
           ),
           Container(
-              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.5),
+              margin: EdgeInsets.only(left: width * 0.02),
               height: height * 0.05,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
@@ -537,7 +550,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   color: Theme.of(context).hintColor,
                 ),
               ),
-              items: countries_copy.map<DropdownMenuItem<String>>((String item) {
+              items: countries_copy.keys.map<DropdownMenuItem<String>>((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
                   child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -612,7 +625,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
                   color: Theme.of(context).hintColor,
                 ),
               ),
-              items: cities_copy_of.map<DropdownMenuItem<String>>((String item) {
+              items: cities_copy_of.keys.map<DropdownMenuItem<String>>((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
                   child: Text(item, style: GoogleFonts.roboto(color: Colors.black),),
@@ -695,7 +708,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(left: width * 0.3, right: width * 0.3, top: height * 0.02, bottom: height * 0.02),
+            margin: EdgeInsets.only(left: width * 0.1, right: width * 0.1, top: height * 0.02, bottom: height * 0.02),
             child: ElevatedButton(
               onPressed: () {
                 get_tours();

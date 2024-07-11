@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -44,7 +45,6 @@ class _TicketsScreenState extends State<TicketsScreen> {
         movements.add(trainsTo_copy);
       });
     }
-    print(movements[0]);
   }
 
   @override
@@ -83,11 +83,13 @@ class _TicketsScreenState extends State<TicketsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(movement[movements.indexOf(movement)][index]['title'].toString(), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 28)),
-
+                          titles[movements.indexOf(movement)] == 'Trains' ? Image.network(movement[movements.indexOf(movement)][index]['logotype'].toString(), width: width * 0.3,): SvgPicture.network(movement[movements.indexOf(movement)][index]['logotype'].toString())
                         ],
-                      )
+                      ),
+                      Text(DateFormat('HH:mm').format(DateTime.parse(movement[movements.indexOf(movement)][index]['departure'].toString())).toString() + ' - ' + DateFormat('HH:mm').format(DateTime.parse(movement[movements.indexOf(movement)][index]['arrival'].toString())).toString(), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 20)),
                     ],
                   ),
                 );

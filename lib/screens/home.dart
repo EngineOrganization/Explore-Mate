@@ -52,6 +52,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   bool user_initializated = false;
 
+  List<String> images = [];
+  List<String> images_copy = [];
+
   @override
   void initState() {
     super.initState();
@@ -77,12 +80,14 @@ class _HomeScreenState extends State<HomeScreen> {
           selected_tour_budget = event.snapshot.child('selected_tour').child('budget').value.toString();
         });
       }
+      tours = [];
       int length = snapshot.children.length;
       for (int i = 0; i < length; i++) {
         int daysLength = snapshot.child(i.toString()).child('Trip').children.length;
         tours.add([]);
         tours_countries.add(snapshot.child(i.toString()).child('countryTo').value.toString());
         tours_cities.add(snapshot.child(i.toString()).child('cityTo').value.toString());
+        images.add(snapshot.child(i.toString()).child('image').value.toString());
         for (int j = 0; j < daysLength; j++) {
           int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children.length;
           tours[i].add([]);
@@ -96,6 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       setState(() {
         tours_count = tours.length;
+        images_copy = images;
       });
     });
   }
@@ -243,7 +249,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       height: height * 0.2,
                       child: ListView.builder(
                         itemCount: functions.length,
-                        physics: NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           return Container(
                             height: height * 0.04,
@@ -371,15 +376,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: width * 0.26,
                     margin: EdgeInsets.only(right: width * 0.055),
                     decoration: BoxDecoration(
-                        color: Color(0xFFf0f0f0),
-                        borderRadius: BorderRadius.circular(14)
+                        borderRadius: BorderRadius.circular(14),
+                        image: DecorationImage(image: NetworkImage(images_copy[index]), fit: BoxFit.cover, opacity: 0.6, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.25), BlendMode.plus))
                     ),
                     padding: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.01),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),),
-                        Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),),
+                        Text(tours_countries[index], style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),
+                        Text(tours_cities[index], style: GoogleFonts.roboto(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w600),),
                       ],
                     ),
                   );

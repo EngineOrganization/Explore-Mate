@@ -1,5 +1,4 @@
 import 'package:explore_mate/screens/home.dart';
-import 'package:explore_mate/screens/selection_movement.dart';
 import 'package:explore_mate/screens/tickets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -52,6 +51,10 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
   List<List<Map<String, Object>>> trainsTo = [];
   List<List<Map<String, Object>>> trainsTo_copy = [];
 
+  List<String> images = [];
+  List<String> images_copy = [];
+  List<String> codes = [];
+
   void get_generated_tours() async {
     await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
       setState(() {
@@ -69,6 +72,8 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
       tours_cities = [];
       tours_countries = [];
       planesTo = [];
+      images = [];
+      codes = [];
       for (int i = 0; i < length; i++) {
         int daysLength = snapshot.child(i.toString()).child('Trip').children!.length;
         tours.add([]);
@@ -76,15 +81,17 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
         trainsTo.add([]);
         tours_countries.add(snapshot.child(i.toString()).child('countryTo').value.toString());
         tours_cities.add(snapshot.child(i.toString()).child('cityTo').value.toString());
+        images.add(snapshot.child(i.toString()).child('image').value.toString());
+        codes.add(snapshot.child(i.toString()).child('countryCode').value.toString());
         int planesLength = snapshot.child(i.toString()).child('planes').children.length;
         int trainsLength = snapshot.child(i.toString()).child('trains').children.length;
         for (int j = 0; j < planesLength; j++) {
           final plane = snapshot.child(i.toString()).child('planes').child(j.toString());
-          planesTo[i].add({'number': plane.child('number').value.toString(), 'title': plane.child('title').value.toString(), 'vehicle': plane.child('vehicle').value.toString(), 'departure': plane.child('departure').value.toString(), 'arrival': plane.child('arrival').value.toString(), 'duration': plane.child('duration').value.toString(), 'carrier': {'title': plane.child('carrier').child('title').value, 'logotype': plane.child('carrier').child('logotype').value}});
+          planesTo[i].add({'number': plane.child('number').value.toString(), 'title': plane.child('title').value.toString(), 'vehicle': plane.child('vehicle').value.toString(), 'departure': plane.child('departure').value.toString(), 'arrival': plane.child('arrival').value.toString(), 'duration': plane.child('duration').value.toString(), 'logotype': plane.child('logotype').value.toString()});
         }
         for (int j = 0; j < planesLength; j++) {
           final train = snapshot.child(i.toString()).child('trains').child(j.toString());
-          trainsTo[i].add({'number': train.child('number').value.toString(), 'title': train.child('title').value.toString(), 'vehicle': train.child('vehicle').value.toString(), 'departure': train.child('departure').value.toString(), 'arrival': train.child('arrival').value.toString(), 'duration': train.child('duration').value.toString(), 'carrier': {'title': train.child('carrier').child('title').value, 'logotype': train.child('carrier').child('logotype').value}});
+          trainsTo[i].add({'number': train.child('number').value.toString(), 'title': train.child('title').value.toString(), 'vehicle': train.child('vehicle').value.toString(), 'departure': train.child('departure').value.toString(), 'arrival': train.child('arrival').value.toString(), 'duration': train.child('duration').value.toString(), 'logotype': train.child('logotype').value.toString()});
         }
         for (int j = 0; j < daysLength; j++) {
           int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children!.length;
@@ -103,6 +110,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
         tours_cities_copy = tours_cities;
         planesTo_copy = planesTo;
         trainsTo_copy = trainsTo;
+        images_copy = images;
       });
     });
   }
@@ -131,35 +139,35 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                 width: width,
                 height: height * 0.3,
                 decoration: BoxDecoration(
-                    color: Color(0xFFf0f0f0)
+                    image: DecorationImage(image: NetworkImage(images[pageIndex]), fit: BoxFit.cover, opacity: 0.7, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.25), BlendMode.plus))
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Container(
-                          margin: EdgeInsets.only(top: height * 0.03, left: width * 0.02),
+                          margin: EdgeInsets.only(top: height * 0.01, left: width * 0.02),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(tours_countries_copy[pageIndex], style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 36),),
-                              Text(tours_cities_copy[pageIndex], style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.normal, fontSize: 28),)
+                              Text(tours_countries_copy[pageIndex], style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 28,),),
+                              Text(tours_cities_copy[pageIndex], style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.normal, fontSize: 20),)
                             ],
                           ),
                         ),
                         Container(
-                          width: width * 0.2,
                           height: height * 0.1,
+                          margin: EdgeInsets.only(top: height * 0.01, right: width * 0.02),
                           child: SmoothPageIndicator(
                             controller: _controller,
                             count: page_count,
                             effect: ExpandingDotsEffect(
                               activeDotColor: Colors.black,
                               dotColor: Colors.white,
-                              dotHeight: 30,
-                              dotWidth: 30
+                              dotHeight: width * 0.04,
+                              dotWidth: width * 0.04
                             ),
                           )
                         )
@@ -170,25 +178,25 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
               ),
               Container(
                 width: width,
-                height: height * 0.3 * 5,
+                height: height * 0.25 * 5,
                 padding: EdgeInsets.only(left: width * 0.1, right: width * 0.1),
                 child: ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: tours_copy[pageIndex].length,
                   itemBuilder: (context, dayIndex) {
                     return Container(
-                      height: height * 0.3,
+                      height: height * 0.25,
                       child: TimelineTile(
                         isFirst: dayIndex == 0,
                         isLast: dayIndex == 4,
                         beforeLineStyle: LineStyle(color: Colors.black),
                         indicatorStyle: IndicatorStyle(
-                            width: 40,
+                            width: 20,
                             color: Colors.black
                         ),
                         alignment: TimelineAlign.end,
                         startChild: Container(
-                          margin: EdgeInsets.only(right: width * 0.1),
+                          margin: EdgeInsets.only(right: width * 0.05),
                           height: height * 0.2,
                           decoration: BoxDecoration(
                               color: Color(0xFFf0f0f0),
@@ -199,50 +207,21 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                             children: [
                               Container(
                                 margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
-                                child: Text(dayIndex == 0 ? 'День ' + (dayIndex + 1).toString() + ' / Начало путешествия' : (dayIndex == tours_copy[pageIndex].length - 1 ? 'День ' + (dayIndex + 1).toString() + ' / Возращение обратно' : 'День ' + (dayIndex + 1).toString()), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),),
+                                child: Text(dayIndex == 0 ? 'День ' + (dayIndex + 1).toString() + ' / Начало путешествия' : (dayIndex == tours_copy[pageIndex].length - 1 ? 'День ' + (dayIndex + 1).toString() + ' / Возращение обратно' : 'День ' + (dayIndex + 1).toString()), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),),
                               ),
                               Container(
                                 margin: EdgeInsets.only(left: width * 0.01),
-                                height: height * 0.15,
-                                width: width * 0.5,
+                                height: height * 0.14,
+                                width: width * 0.7,
                                 child: ListView.builder(
-                                  itemCount: dayIndex == 0 ? tours_copy[pageIndex][dayIndex].length + 1 : tours_copy[pageIndex][dayIndex].length,
+                                  itemCount: tours_copy[pageIndex][dayIndex].length,
                                   itemBuilder: (context, actionIndex) {
-                                    return (dayIndex == 0 && actionIndex == 0) ? GestureDetector(
+                                    return GestureDetector(
                                       child:  Container(
                                         margin: EdgeInsets.only(left: width * 0.01, top: height * 0.01),
                                         padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.01, bottom: height * 0.01),
-                                        child: Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text('Выбрать способ перемещения', style: GoogleFonts.roboto(color: Colors.black, fontSize: 14),),
-                                            Row(
-                                              children: [
-                                                Container(
-                                                  child: planesTo_copy.length > 0 ? (planesTo_copy[pageIndex].length > 0 ? CircleAvatar(child: Icon(Icons.flight, color: Colors.white,), backgroundColor: Colors.black,) : Container()) : Container(),
-                                                  margin: EdgeInsets.only(right: width * 0.01),
-                                                ),
-                                                Container(
-                                                  child: trainsTo_copy.length > 0 ? (trainsTo_copy[pageIndex].length > 0 ? CircleAvatar(child: Icon(Icons.train, color: Colors.white,), backgroundColor: Colors.black,) : Container()) : Container(),
-                                                  margin: EdgeInsets.only(right: width * 0.01),
-                                                ),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(20)
-                                        ),
-                                      ),
-                                      onTap: () {
-                                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => TicketsScreen(planesTo_copy: planesTo_copy, trainsTo_copy: trainsTo_copy,)));
-                                      },
-                                    ) : GestureDetector(
-                                      child:  Container(
-                                        margin: EdgeInsets.only(left: width * 0.01, top: height * 0.01),
-                                        padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.01, bottom: height * 0.01),
-                                        child: Text(dayIndex == 0 ? tours_copy[pageIndex][dayIndex][actionIndex-1]['name']! : tours_copy[pageIndex][dayIndex][actionIndex]['name']!, style: GoogleFonts.roboto(color: Colors.black, fontSize: 14),),
+                                        height: height * 0.05,
+                                        child: Text(tours_copy[pageIndex][dayIndex][actionIndex]['name']!, style: GoogleFonts.roboto(color: Colors.black, fontSize: 12),),
                                         decoration: BoxDecoration(
                                             color: Colors.white,
                                             borderRadius: BorderRadius.circular(20)
