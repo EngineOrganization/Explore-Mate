@@ -12,13 +12,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
-
 
 class _HomeScreenState extends State<HomeScreen> {
 
@@ -31,8 +31,8 @@ class _HomeScreenState extends State<HomeScreen> {
   GlobalKey mapKey = GlobalKey();
   Future<bool> get locationPermissionNotGranted async => !(await Permission.location.request().isGranted);
 
-  List functions = ['Ближайшие магазины', 'Перевести речь собеседника', 'Придумать равзлечение', 'Где поесть?'];
-  List functions_icons = [Icons.shopping_basket_outlined, Icons.translate, Icons.attractions_outlined, Icons.restaurant];
+  List functions = ['Ближайшие магазины', 'Придумать равзлечение', 'Где поесть?', 'Отели'];
+  List functions_icons = [Icons.shopping_basket_outlined, Icons.attractions_outlined, Icons.restaurant, Icons.hotel];
   final List<ChartData> chartData = [
     ChartData('чебуречная', 1),
     ChartData('абоба', 2),
@@ -54,11 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> images = [];
   List<String> images_copy = [];
 
+  String tour_text = "";
+
   @override
   void initState() {
     super.initState();
     get_tours();
   }
+
+  List<String> dailyPlan = [];
 
   void get_tours() async {
     await FirebaseAuth.instance.authStateChanges().listen((User? _user) {
@@ -77,6 +81,25 @@ class _HomeScreenState extends State<HomeScreen> {
           selected_tour_country = event.snapshot.child('selected_tour').child('country').value.toString();
           selected_tour_city = event.snapshot.child('selected_tour').child('city').value.toString();
           selected_tour_budget = event.snapshot.child('selected_tour').child('budget').value.toString();
+        });
+        DateTime tour_date = DateFormat("yyyy-MM-dd").parse(event.snapshot.child('selected_tour').child('travelDate').value.toString());
+        DateTime current_date = DateTime.now();
+        int day = DateTime(current_date.year - tour_date.year, current_date.month - tour_date.month, current_date.day - tour_date.day + 1).day;
+        if (current_date.isAfter(tour_date)) {
+          setState(() {
+            tour_text = "Путешествие. День " + day.toString();
+          });
+        } else {
+          setState(() {
+            tour_text = "Готовимся к путешествию";
+          });
+        }
+        event.snapshot.child('selected_tour').child('Trip').child('Day ' + day.toString()).children.forEach((action) {
+          dailyPlan.add(action.child('name').value.toString());
+        });
+      } else {
+        setState(() {
+          tour_text = "Подобрать путешествие";
         });
       }
       tours = [];
@@ -202,29 +225,27 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Container(
                         margin: EdgeInsets.only(top: height * 0.02),
-                        child: Text(is_travel ? 'Ваше путешествие' : 'Создать путешествие', style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
+                        child: Text(tour_text, style: GoogleFonts.roboto(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24),),
                       ),
-                      is_travel ? Container(
+                      tour_text == "Готовимся к путешествию" ? Container(
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Container(
-                              child: Text('Страна: ' + selected_tour_country, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                              alignment: Alignment.topLeft,
-                              margin: EdgeInsets.only(left: width * 0.02),
-                            ),
-                            Container(
-                              child: Text('Город: ' + selected_tour_city, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                              alignment: Alignment.topLeft,
-                              margin: EdgeInsets.only(left: width * 0.02),
-                            ),
-                            Container(
-                              child: Text('Бюджет: ' + selected_tour_budget, style: GoogleFonts.roboto(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold )),
-                              alignment: Alignment.topLeft,
-                              margin: EdgeInsets.only(left: width * 0.02),
-                            ),
+                            Icon(Icons.backpack, color: Colors.white, size: 160,)
                           ],
                         ),
-                      ) : Container()
+                      ) :tour_text == "Подобрать путешествие" ?  Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.flight_takeoff, color: Colors.white, size: 160,)
+                          ],
+                        ),
+                      ) : Container(
+                        child: Column(),
+                      )
                     ],
                   ),
                 ),
@@ -283,14 +304,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   margin: EdgeInsets.only(left: width * 0.06, right: width * 0.06, top: height * 0.02),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: 5,
+                    itemCount: dailyPlan.length,
                     itemBuilder: (context, index) {
                       return Container(
                         width: width * 0.3,
                         height: height * 0.2,
                         child: TimelineTile(
                           isFirst: index == 0,
-                          isLast: index == (tours_count - 1),
+                          isLast: index == (dailyPlan.length - 1),
                           axis: TimelineAxis.horizontal,
                           beforeLineStyle: LineStyle(color: Colors.black),
                           indicatorStyle: IndicatorStyle(
@@ -305,8 +326,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(20)
                             ),
                             child: Container(
-                              margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
-                              child: Text('Text', style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
+                              margin: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.02),
+                              child: Text(dailyPlan[index], style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),),
                             ),
                           ),
                         ),
@@ -373,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     margin: EdgeInsets.only(right: width * 0.055),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(14),
-                        image: DecorationImage(image: NetworkImage(images_copy[index]), fit: BoxFit.cover, opacity: 0.6, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.25), BlendMode.plus))
+                        // image: DecorationImage(image: NetworkImage(images_copy[index]), fit: BoxFit.cover, opacity: 0.6, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.25), BlendMode.plus))
                     ),
                     padding: EdgeInsets.only(left: width * 0.02, right: width * 0.02, top: height * 0.01),
                     child: Column(

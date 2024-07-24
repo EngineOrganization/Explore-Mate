@@ -1,5 +1,4 @@
-import 'package:explore_mate/screens/home.dart';
-import 'package:explore_mate/screens/tickets.dart';
+import 'package:explore_mate/screens/travel_information.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:timeline_tile/timeline_tile.dart';
@@ -44,13 +43,6 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
 
   final _controller = PageController();
 
-  List<List<Map<String, Object>>> planesTo = [];
-  List<List<Map<String, Object>>> planesTo_copy = [];
-
-
-  List<List<Map<String, Object>>> trainsTo = [];
-  List<List<Map<String, Object>>> trainsTo_copy = [];
-
   List<String> images = [];
   List<String> images_copy = [];
   List<String> codes = [];
@@ -71,28 +63,15 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
       tours = [];
       tours_cities = [];
       tours_countries = [];
-      planesTo = [];
       images = [];
       codes = [];
       for (int i = 0; i < length; i++) {
         int daysLength = snapshot.child(i.toString()).child('Trip').children!.length;
         tours.add([]);
-        planesTo.add([]);
-        trainsTo.add([]);
         tours_countries.add(snapshot.child(i.toString()).child('countryTo').value.toString());
         tours_cities.add(snapshot.child(i.toString()).child('cityTo').value.toString());
         images.add(snapshot.child(i.toString()).child('image').value.toString());
         codes.add(snapshot.child(i.toString()).child('countryCode').value.toString());
-        int planesLength = snapshot.child(i.toString()).child('planes').children.length;
-        int trainsLength = snapshot.child(i.toString()).child('trains').children.length;
-        for (int j = 0; j < planesLength; j++) {
-          final plane = snapshot.child(i.toString()).child('planes').child(j.toString());
-          planesTo[i].add({'number': plane.child('number').value.toString(), 'title': plane.child('title').value.toString(), 'vehicle': plane.child('vehicle').value.toString(), 'departure': plane.child('departure').value.toString(), 'arrival': plane.child('arrival').value.toString(), 'duration': plane.child('duration').value.toString(), 'logotype': plane.child('logotype').value.toString()});
-        }
-        for (int j = 0; j < planesLength; j++) {
-          final train = snapshot.child(i.toString()).child('trains').child(j.toString());
-          trainsTo[i].add({'number': train.child('number').value.toString(), 'title': train.child('title').value.toString(), 'vehicle': train.child('vehicle').value.toString(), 'departure': train.child('departure').value.toString(), 'arrival': train.child('arrival').value.toString(), 'duration': train.child('duration').value.toString(), 'logotype': train.child('logotype').value.toString()});
-        }
         for (int j = 0; j < daysLength; j++) {
           int actionsLength = snapshot.child(i.toString()).child('Trip').child('Day ' + (j+1).toString()).children!.length;
           tours[i].add([]);
@@ -108,12 +87,12 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
         tours_copy = tours;
         tours_countries_copy = tours_countries;
         tours_cities_copy = tours_cities;
-        planesTo_copy = planesTo;
-        trainsTo_copy = trainsTo;
         images_copy = images;
+        print(tours_copy[0].length);
       });
     });
   }
+
 
 
   void select_tour(int tour_index) async {
@@ -178,17 +157,16 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
               ),
               Container(
                 width: width,
-                height: height * 0.25 * tours_copy[pageIndex].length + height * 0.05,
                 padding: EdgeInsets.only(left: width * 0.1, right: width * 0.1),
                 child: ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   itemCount: tours_copy[pageIndex].length,
+                  shrinkWrap: true,
                   itemBuilder: (context, dayIndex) {
                     return Container(
-                      height: height * tours_copy[dayIndex].length * 0.05,
                       child: TimelineTile(
                         isFirst: dayIndex == 0,
-                        isLast: dayIndex == 4,
+                        isLast: dayIndex == tours_copy[pageIndex].length - 1,
                         beforeLineStyle: LineStyle(color: Colors.black),
                         indicatorStyle: IndicatorStyle(
                             width: 20,
@@ -197,7 +175,6 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                         alignment: TimelineAlign.end,
                         startChild: Container(
                           margin: EdgeInsets.only(right: width * 0.05, top: height * 0.05),
-                          height: height * 0.25,
                           decoration: BoxDecoration(
                               color: Color(0xFFf0f0f0),
                               borderRadius: BorderRadius.circular(20)
@@ -207,11 +184,11 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                             children: [
                               Container(
                                 margin: EdgeInsets.only(left: width * 0.05, top: height * 0.02),
-                                child: Text(dayIndex == 0 ? 'День ' + (dayIndex + 1).toString() + ' / Начало путешествия' : (dayIndex == tours_copy[pageIndex].length - 1 ? 'День ' + (dayIndex + 1).toString() + ' / Возращение обратно' : 'День ' + (dayIndex + 1).toString()), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),),
+                                child: Text('День ' + (dayIndex + 1).toString(), style: GoogleFonts.roboto(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),),
                               ),
                               Container(
                                 margin: EdgeInsets.only(left: width * 0.01),
-                                height: height * 0.14,
+                                height: height * tours_copy[pageIndex][dayIndex].length * 0.08,
                                 width: width * 0.7,
                                 child: ListView.builder(
                                   itemCount: tours_copy[pageIndex][dayIndex].length,
@@ -239,6 +216,9 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                   },
                 ),
               ),
+              SizedBox(
+                height: height * 0.05,
+              ),
               Container(
                 height: height * 0.5,
                 width: width,
@@ -262,7 +242,7 @@ class _GeneratedToursScreenState extends State<GeneratedToursScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     select_tour(pageIndex);
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => HomeScreen()));
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context) => TravelInformation()));
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black

@@ -114,7 +114,7 @@ class _CreateTravelScreenState extends State<CreateTravelScreen> {
       final snapshot = event.snapshot;
       to ? cities_to = {} : cities_of = {};
       snapshot.child('countries').child(countries[to ? dropdownCountryTo.toString() : dropdownCountryOf.toString()]!['code'].toString()).child('cities').children.forEach((city) {
-        to ? cities_to[city.key.toString()] = city.value.toString() : cities_of[city.key.toString()] = city.value.toString();
+        to ? cities_to[city.key.toString()] = city.child('code').value.toString() : cities_of[city.key.toString()] = city.child('code').value.toString();
       });
       setState(() {
         to ? cities_copy_to = cities_to : cities_copy_of = cities_of;

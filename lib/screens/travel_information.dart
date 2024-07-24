@@ -20,12 +20,17 @@ class _TravelInformationState extends State<TravelInformation> {
     'Сейчас вам будут предложены способы добраться до места назначения. Также вы можете добраться своим ходом.'
   ];
 
+  List<IconData> icons = [
+    Icons.done,
+    Icons.airplane_ticket
+  ];
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: PageView.builder(
         controller: _controller,
         itemCount: information.length,
@@ -41,9 +46,9 @@ class _TravelInformationState extends State<TravelInformation> {
                     child: SmoothPageIndicator(
                       controller: _controller,
                       count: information.length,
-                      effect: ExpandingDotsEffect(
-                          activeDotColor: Colors.white,
-                          dotColor: Colors.white,
+                      effect: ScrollingDotsEffect(
+                          activeDotColor: Colors.black,
+                          dotColor: Colors.black,
                           dotHeight: width * 0.04,
                           dotWidth: width * 0.04
                       ),
@@ -51,19 +56,23 @@ class _TravelInformationState extends State<TravelInformation> {
                 ),
               ),
               Container(
-                child: Text(information[pageIndex], style: GoogleFonts.roboto(color: Colors.white, fontSize: 48, fontWeight: FontWeight.bold),),
+                margin: EdgeInsets.only(left: width * 0.02),
+                child: Text(information[pageIndex], style: GoogleFonts.roboto(color: Colors.black, fontSize: 48, fontWeight: FontWeight.bold),),
+              ),
+              Container(
+                child: Icon(icons[pageIndex], size: 400,),
               ),
               Container(
                 alignment: Alignment.bottomRight,
                 margin: EdgeInsets.only(left: width * 0.1, right: width * 0.1, top: height * 0.02, bottom: height * 0.02),
                 child: ElevatedButton(
                   onPressed: () {
-                    pageIndex == information.length - 1 ? Navigator.of(context).push(MaterialPageRoute(builder: (context) => TicketsScreen())) : _controller.nextPage(duration: Duration(milliseconds: 500), curve: Curves.bounceInOut);
+                    pageIndex == (information.length - 1) ? Navigator.of(context).push(MaterialPageRoute(builder: (context) => TicketsScreen())) : _controller.nextPage(duration: Duration(milliseconds: 500), curve: Curves.bounceInOut);
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white
+                      backgroundColor: Colors.black
                   ),
-                  child: Text('Далее', style: GoogleFonts.roboto(color: Colors.black, fontSize: 30, fontWeight: FontWeight.bold),),
+                  child: Text('Далее', style: GoogleFonts.roboto(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold),),
                 ),
               )
             ],

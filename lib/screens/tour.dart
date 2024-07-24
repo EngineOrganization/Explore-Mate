@@ -5,6 +5,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeline_tile/timeline_tile.dart';
+import 'package:intl/intl.dart';
 
 
 class TourScreen extends StatefulWidget {
@@ -48,10 +49,13 @@ class _TourScreenState extends State<TourScreen> {
       final snapshot = event.snapshot.child('selected_tour');
       if (event.snapshot.child('selected_tour').exists) {
         setState(() {
-          tour_country = event.snapshot.child('selected_tour').child('country').value.toString();
-          tour_city = event.snapshot.child('selected_tour').child('city').value.toString();
+          tour_country = event.snapshot.child('selected_tour').child('countryTo').value.toString();
+          tour_city = event.snapshot.child('selected_tour').child('cityTo').value.toString();
           tour = [];
         });
+        DateTime tour_date = DateFormat("yyyy-MM-dd").parse(event.snapshot.child('selected_tour').child('travelDate').value.toString());
+        DateTime current_date = DateTime.now();
+        selected_day = DateTime(current_date.year - tour_date.year, current_date.month - tour_date.month, current_date.day - tour_date.day + 1).day - 1;
       }
       int daysLength = snapshot.child('Trip').children.length;
       for (int i = 0; i < daysLength; i++) {
@@ -61,6 +65,7 @@ class _TourScreenState extends State<TourScreen> {
         for (int j = 0; j < actionsLength; j++) {
           tour[i].add({});
           tour[i][j]['name'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('name').value.toString();
+          tour[i][j]['info'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('info').value.toString();
           tour[i][j]['lat'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('lat').value.toString();
           tour[i][j]['lon'] = snapshot.child('Trip').child('Day ' + (i+1).toString()).child('Action ' + (j + 1).toString()).child('lon').value.toString();
           markers[i].add(Marker(point: LatLng(double.parse(tour[i][j]['lat'].toString()), double.parse(tour[i][j]['lon'].toString())), child: Container(
@@ -120,10 +125,6 @@ class _TourScreenState extends State<TourScreen> {
                       width: width * 0.6,
                       height: height * 0.05,
                       padding: EdgeInsets.only(left: width * 0.01, right: width * 0.01, top: height * 0.005, bottom: height * 0.005),
-                      decoration: BoxDecoration(
-                          color: Color(0xFFf0f0f0),
-                          borderRadius: BorderRadius.circular(30)
-                      ),
                       margin: EdgeInsets.only(right: width * 0.05, top: height * 0.01),
                       child: ListView.builder(
                         itemCount: tour.length,
@@ -182,26 +183,44 @@ class _TourScreenState extends State<TourScreen> {
                                 color: Color(0xFFedf0f8),
                                 borderRadius: BorderRadius.circular(20)
                             ),
-                            child: Container(
-                              margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
-                              child: Column(
-                                children: [
-                                  Container(
-                                    child: IconButton(
-                                      icon: Icon(Icons.pin_drop, size: 30,),
-                                      onPressed: () {
-                                        setState(() {
-                                          mapController.move(markers[selected_day][index].point, 14);
-                                        });
-                                      },
-                                      color: Colors.black,
+                            child: GestureDetector(
+                              child: Container(
+                                margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
+                                padding: EdgeInsets.only(top: height * 0.01, bottom: height * 0.02),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      height: height * 0.06,
+                                      child: Text(tour_copy[selected_day][index]['name'].toString(), style: GoogleFonts.roboto(color: Colors.black, fontSize: 26, fontWeight: FontWeight.bold),),
                                     ),
-                                    alignment: Alignment.topRight,
-                                  ),
-                                  Text(tour_copy[selected_day][index]['name'].toString(), style: GoogleFonts.roboto(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),)
-                                ],
+                                    Container(
+                                      margin: EdgeInsets.only(top: height * 0.02),
+                                      child: Text(tour_copy[selected_day][index]['info'].toString(), style: GoogleFonts.roboto(color: Colors.black, fontSize: 18, fontWeight: FontWeight.normal)),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        alignment: Alignment.bottomLeft,
+                                        child: ElevatedButton(
+                                          child: Text('Маршрут', style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),),
+                                          onPressed: () {},
+                                          style: ElevatedButton.styleFrom(
+                                              foregroundColor: Colors.white,
+                                              backgroundColor: Colors.black
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
+                              onTap: () {
+                                setState(() {
+                                  mapController.move(markers[selected_day][index].point, 14);
+                                });
+                              },
+                            )
                           ),
                         ),
                       );

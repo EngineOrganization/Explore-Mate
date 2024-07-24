@@ -1,9 +1,10 @@
-class AirTicker {
+class AirTicket {
   double total_amount;
   String total_currency;
   String id;
   Slices slices;
-  AirTicker(this.total_amount, this.total_currency, this.id, this.slices);
+  Owner owner;
+  AirTicket(this.total_amount, this.total_currency, this.id, this.slices, this.owner);
 }
 
 
