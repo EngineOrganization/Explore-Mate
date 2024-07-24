@@ -60,8 +60,8 @@ class Segments {
 
 
 class Segment {
-  String arriving_at;
-  String departing_at;
+  DateTime arriving_at;
+  DateTime departing_at;
   String id;
   Aircraft aircraft;
   OriginSegment originSegment;

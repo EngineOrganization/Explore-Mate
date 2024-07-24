@@ -1,5 +1,6 @@
 import 'package:explore_mate/screens/home.dart';
 import 'package:explore_mate/screens/login.dart';
+import 'package:explore_mate/screens/tickets.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,7 +26,7 @@ void main() async {
   });
   runApp(
     MaterialApp(
-      home: isSign ? HomeScreen() : LoginScreen(),
+      home: isSign ? TicketsScreen() : LoginScreen(),
       debugShowCheckedModeBanner: false,
     )
   );
