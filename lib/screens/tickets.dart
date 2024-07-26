@@ -1,3 +1,4 @@
+import 'package:explore_mate/screens/airline_ticket.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'models/airTicket.dart';
@@ -108,63 +109,68 @@ class _TicketsScreenState extends State<TicketsScreen> {
 
 
   Widget airTicketWidget(AirTicket airTicket) {
-    return Container(
-      height: height * 0.2,
-      margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Color(0xFFf0f0f0)
-      ),
-      padding: EdgeInsets.only(top: height * 0.02, bottom: height * 0.02, left: width * 0.03, right: width * 0.03),
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(airTicket.total_currency + ' ' + airTicket.total_amount.toString(), style: GoogleFonts.roboto(fontSize: 24, fontWeight: FontWeight.bold),),
-              SvgPicture.network(airTicket.owner.logo_symbol_url, width: width * 0.03)
-            ],
-          ),
-          Expanded(
-            child: Container(
-              alignment: Alignment.bottomLeft,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: airTicket.slices.slices[0].segments.segments.length + 1,
-                      itemBuilder: (context, index) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Container(
-                              height: height * 0.06,
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(index == airTicket.slices.slices[0].segments.segments.length ? (airTicket.slices.slices[0].segments.segments[index-1].departing_at.hour.toString() + ':' + airTicket.slices.slices[0].segments.segments[index-1].departing_at.minute.toString()) : (airTicket.slices.slices[0].segments.segments[index].arriving_at.hour.toString() + ':' + airTicket.slices.slices[0].segments.segments[index].arriving_at.minute.toString())),
-                                  Text(index == airTicket.slices.slices[0].segments.segments.length ? airTicket.slices.slices[0].segments.segments[index-1].destinationSegment.iata_code : airTicket.slices.slices[0].segments.segments[index].originSegment.iata_code),
-                                ],
-                              ),
-                            ),
-                            index == airTicket.slices.slices[0].segments.segments.length ? Container() : Icon(Icons.arrow_right, color: Colors.black, size: 24,)
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  airTicket.slices.slices[0].segments.segments.length == 1 ? Text('Direct') : Text((airTicket.slices.slices[0].segments.segments.length - 1).toString() + ' layovers'),
-                ],
-              ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => AirlineTicket(airlineTicket: airTicket,)));
+      },
+      child: Container(
+        height: height * 0.2,
+        margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: Color(0xFFf0f0f0)
+        ),
+        padding: EdgeInsets.only(top: height * 0.02, bottom: height * 0.02, left: width * 0.03, right: width * 0.03),
+        child: Column(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(airTicket.total_currency + ' ' + airTicket.total_amount.toString(), style: GoogleFonts.roboto(fontSize: 24, fontWeight: FontWeight.bold),),
+                SvgPicture.network(airTicket.owner.logo_symbol_url, width: width * 0.03)
+              ],
             ),
-          )
-        ],
+            Expanded(
+              child: Container(
+                alignment: Alignment.bottomLeft,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: airTicket.slices.slices[0].segments.segments.length + 1,
+                        itemBuilder: (context, index) {
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                height: height * 0.06,
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(index == airTicket.slices.slices[0].segments.segments.length ? (airTicket.slices.slices[0].segments.segments[index-1].departing_at.hour.toString() + ':' + airTicket.slices.slices[0].segments.segments[index-1].departing_at.minute.toString()) : (airTicket.slices.slices[0].segments.segments[index].arriving_at.hour.toString() + ':' + airTicket.slices.slices[0].segments.segments[index].arriving_at.minute.toString())),
+                                    Text(index == airTicket.slices.slices[0].segments.segments.length ? airTicket.slices.slices[0].segments.segments[index-1].destinationSegment.iata_code : airTicket.slices.slices[0].segments.segments[index].originSegment.iata_code),
+                                  ],
+                                ),
+                              ),
+                              index == airTicket.slices.slices[0].segments.segments.length ? Container() : Icon(Icons.arrow_right, color: Colors.black, size: 24,)
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    airTicket.slices.slices[0].segments.segments.length == 1 ? Text('Direct') : Text((airTicket.slices.slices[0].segments.segments.length - 1).toString() + ' layovers'),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

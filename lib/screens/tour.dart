@@ -6,6 +6,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 
 class TourScreen extends StatefulWidget {
@@ -78,6 +80,12 @@ class _TourScreenState extends State<TourScreen> {
         markers_copy = markers;
       });
     });
+  }
+
+
+  void navigateWithGoogle(String? lat, String? lon) async {
+    var uri = Uri.parse("google.navigation:q=$lat,$lon&mode=d");
+    await launchUrlString(uri.toString());
   }
 
   @override
@@ -204,7 +212,11 @@ class _TourScreenState extends State<TourScreen> {
                                         alignment: Alignment.bottomLeft,
                                         child: ElevatedButton(
                                           child: Text('Маршрут', style: GoogleFonts.roboto(fontSize: 18, fontWeight: FontWeight.bold),),
-                                          onPressed: () {},
+                                          onPressed: () {
+                                            String? lat = tour_copy[selected_day][index]['lat'];
+                                            String? lon = tour_copy[selected_day][index]['lon'];
+                                            navigateWithGoogle(lat, lon);
+                                          },
                                           style: ElevatedButton.styleFrom(
                                               foregroundColor: Colors.white,
                                               backgroundColor: Colors.black

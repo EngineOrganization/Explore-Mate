@@ -26,7 +26,7 @@ void main() async {
   });
   runApp(
     MaterialApp(
-      home: isSign ? TicketsScreen() : LoginScreen(),
+      home: isSign ? HomeScreen() : LoginScreen(),
       debugShowCheckedModeBanner: false,
     )
   );

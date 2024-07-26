@@ -53,6 +53,7 @@ dependencies:
   smooth_page_indicator: ^1.1.0
   purchases_flutter: ^6.29.4
   dropdown_button2: ^2.3.9
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
