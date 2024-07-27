@@ -5,14 +5,17 @@ import 'package:explore_mate/screens/profile.dart';
 import 'package:explore_mate/screens/subscription.dart';
 import 'package:explore_mate/screens/tour.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' as Chart;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:geolocator/geolocator.dart';
+
 
 class HomeScreen extends StatefulWidget {
 
@@ -22,14 +25,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
 
+  List<Marker> markers = [];
+
+  MapController mapController = MapController();
+
+  Future<bool> get locationPermissionNotGranted async => !(await Permission.location.request().isGranted);
+
   late User user;
 
   bool time_is_open = false;
   bool is_travel = false;
-
-  late YandexMapController controller;
-  GlobalKey mapKey = GlobalKey();
-  Future<bool> get locationPermissionNotGranted async => !(await Permission.location.request().isGranted);
 
   List functions = ['Ближайшие магазины', 'Придумать равзлечение', 'Где поесть?', 'Отели'];
   List functions_icons = [Icons.shopping_basket_outlined, Icons.attractions_outlined, Icons.restaurant, Icons.hotel];
@@ -60,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     get_tours();
+    getPosition();
   }
 
   List<String> dailyPlan = [];
@@ -125,6 +131,14 @@ class _HomeScreenState extends State<HomeScreen> {
         tours_count = tours.length;
         images_copy = images;
       });
+    });
+  }
+
+  void getPosition() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.medium);
+    setState(() {
+      markers.add(Marker(point: LatLng(position.latitude, position.longitude), child: Icon(Icons.person_pin)));
+      mapController.move(LatLng(position.latitude, position.longitude), 14);
     });
   }
 
@@ -341,37 +355,21 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05, top: height * 0.01),
             height: height * 0.2,
-            child: YandexMap(
-              key: mapKey,
-              onMapCreated: (YandexMapController yandexMapController) async {
-                controller = yandexMapController;
-                final mediaQuery = MediaQuery.of(context);
-                final height = mapKey.currentContext!.size!.height * mediaQuery.devicePixelRatio;
-                final width = mapKey.currentContext!.size!.width * mediaQuery.devicePixelRatio;
-                await controller.toggleUserLayer(
-                    visible: true,
-                    autoZoomEnabled: true,
-                    anchor: UserLocationAnchor(
-                        course: Offset(1 * width, 0.5 * height),
-                        normal: Offset(0.5 * width, 0.5 * height)
-                    )
-                );
-              },
-              onUserLocationAdded: (UserLocationView view) async {
-                return view.copyWith(
-                    pin: view.pin.copyWith(
-                        icon: PlacemarkIcon.single(
-                            PlacemarkIconStyle(image: BitmapDescriptor.fromAssetImage('assets/user.png'))
-                        )
-                    ),
-                    accuracyCircle: view.accuracyCircle.copyWith(
-                        fillColor: Colors.green.withOpacity(0.5)
-                    )
-                );
-              },
-              onMapTap: (Point) {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context) => MapScreen()));
-              },
+            child: FlutterMap(
+              mapController: mapController,
+              options: MapOptions(
+                initialZoom: 9,
+                onTap: (tapPos, latlon) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => MapScreen()));
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.engine.explore_mate',
+                ),
+                MarkerLayer(markers: markers)
+              ],
             ),
           ),
           tours.isNotEmpty ? Container(
@@ -417,24 +415,24 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             height: height * 0.4,
             margin: EdgeInsets.only(left: width * 0.05, right: width * 0.05),
-            child: SfCartesianChart(
+            child: Chart.SfCartesianChart(
               margin: EdgeInsets.only(top: 0),
               plotAreaBackgroundColor: Colors.transparent,
               borderColor: Colors.transparent,
               borderWidth: 0,
               plotAreaBorderWidth: 0,
               enableSideBySideSeriesPlacement: false,
-              primaryXAxis: CategoryAxis(
+              primaryXAxis: Chart.CategoryAxis(
                 arrangeByIndex: true,
-                majorGridLines: MajorGridLines(width: 0),
-                majorTickLines: MajorTickLines(width: 0),
+                majorGridLines: Chart.MajorGridLines(width: 0),
+                majorTickLines: Chart.MajorTickLines(width: 0),
               ),
-              primaryYAxis: CategoryAxis(
+              primaryYAxis: Chart.CategoryAxis(
                 isVisible: false,
                 maximum: chartData.last.y + 1,
               ),
               series: [
-                ColumnSeries<ChartData, String>(
+                Chart.ColumnSeries<ChartData, String>(
                   dataSource: chartData,
                   xValueMapper: (ChartData sales, _) => sales.x,
                   yValueMapper: (ChartData sales, _) => sales.y,
